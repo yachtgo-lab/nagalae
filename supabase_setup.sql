@@ -8,6 +8,7 @@ create table if not exists rooms (
   status text default 'waiting',
   stage integer default 0,
   question_idx integer default 0,
+  custom_q text default null,
   created_at timestamptz default now()
 );
 
@@ -52,3 +53,6 @@ alter publication supabase_realtime add table rooms;
 alter publication supabase_realtime add table players;
 alter publication supabase_realtime add table answers;
 alter publication supabase_realtime add table final_choices;
+
+-- 기존 DB에 custom_q 컬럼 추가 (이미 테이블이 있는 경우 이 줄만 실행)
+alter table rooms add column if not exists custom_q text default null;

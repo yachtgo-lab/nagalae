@@ -158,9 +158,40 @@ input:focus{border-color:#7B5EA7}
   <h2 id="rev-title" style="font-size:1rem;word-break:keep-all"></h2>
   <div id="rev-list" style="width:100%"></div>
   <button id="btn-nq" class="btn btn-sec" onclick="hostNextQ()" style="display:none">다음 질문 ▶</button>
-  <button id="btn-ns" class="btn btn-pri" onclick="hostNextStage()" style="display:none">로비로 이동 🏃</button>
-  <button id="btn-fin" class="btn btn-rose" onclick="hostToFinal()" style="display:none">최종 선택으로 💌</button>
+  <button id="btn-ns" class="btn btn-pri" onclick="hostGoCustomQ()" style="display:none">로비로 이동 🏃</button>
+  <button id="btn-fin" class="btn btn-rose" onclick="hostGoCustomQFinal()" style="display:none">최종 선택으로 💌</button>
   <p class="wmsg" id="rev-wait" style="display:none">호스트가 진행합니다…</p>
+</div>
+
+<!-- 방장 커스텀 질문 화면 -->
+<div id="s-custom-q" class="screen">
+  <div style="font-size:2rem;margin-bottom:8px">🐱</div>
+  <h2 style="font-size:1.05rem;font-weight:800;color:#7B5EA7;margin-bottom:6px;word-break:keep-all">로비 직전! 방장 특별 질문</h2>
+  <p style="font-size:.82rem;color:#aaa;margin-bottom:20px;word-break:keep-all">질문을 직접 만들거나, 기존 질문 중 하나를 골라요!</p>
+  <div id="cq-choice" style="width:100%;display:flex;flex-direction:column;gap:10px">
+    <button class="btn btn-pri" onclick="showCustomQForm()" style="font-size:.95rem">✏️ 직접 질문 만들기</button>
+    <button class="btn btn-sec" onclick="hostPickRandomQ()" style="font-size:.95rem">🎲 기존 질문 중 랜덤 추가</button>
+    <button onclick="hostSkipCustomQ()" style="background:none;border:none;color:#bbb;font-size:.82rem;cursor:pointer;padding:8px">건너뛰고 바로 로비로 →</button>
+  </div>
+  <div id="cq-form" style="width:100%;display:none;flex-direction:column;gap:10px">
+    <div style="background:#F3EEFF;border-radius:14px;padding:14px;font-size:.82rem;color:#7B5EA7;font-weight:700;margin-bottom:4px">냥~ 방장이 직접 질문을 만들어줘요!</div>
+    <input id="cq-qtxt" class="inp" placeholder="질문 내용을 입력하세요" style="font-size:.9rem">
+    <input id="cq-atxt" class="inp" placeholder="선택지 A" style="font-size:.9rem;border-color:#FFB5A7">
+    <input id="cq-btxt" class="inp" placeholder="선택지 B" style="font-size:.9rem;border-color:#9DD9D2">
+    <button class="btn btn-pri" onclick="hostSubmitCustomQ()">완성! 모두에게 질문하기 🐾</button>
+    <button onclick="document.getElementById('cq-form').style.display='none';document.getElementById('cq-choice').style.display='flex'" style="background:none;border:none;color:#bbb;font-size:.82rem;cursor:pointer;padding:4px">← 뒤로</button>
+  </div>
+  <p class="wmsg" id="cq-wait" style="display:none;margin-top:24px">방장이 질문을 준비 중이에요… 🐱</p>
+</div>
+
+<!-- 커스텀 질문 답변 화면 -->
+<div id="s-custom-qa" class="screen">
+  <div style="font-size:2rem;margin-bottom:6px">🐾</div>
+  <div style="background:#F3EEFF;border-radius:16px;padding:14px 16px;margin-bottom:20px;font-size:.82rem;color:#9B7FD4;font-weight:700">냥~ 방장 특별 질문!</div>
+  <h2 id="cqa-q" style="font-size:1rem;font-weight:800;color:#5D3A8E;margin-bottom:20px;word-break:keep-all"></h2>
+  <div id="cqa-btns" style="width:100%;display:flex;flex-direction:column;gap:12px"></div>
+  <p class="wmsg" id="cqa-done" style="display:none;margin-top:16px">답변 완료! 다른 사람을 기다리는 중… 🐱</p>
+  <div id="cqa-prog" style="margin-top:16px;font-size:.8rem;color:#aaa"></div>
 </div>
 
 <!-- 로비 (보드 애니메이션) -->
@@ -375,6 +406,8 @@ async function syncAndRender(){
   else if(s==='lobby')renderLobby(room,players,answers);
   else if(s==='question')renderQ(room,players,answers);
   else if(s==='reveal')renderRev(room,players,answers);
+  else if(s==='making_custom_q')renderMakingCustomQ(room);
+  else if(s==='answering_custom_q')renderAnsweringCustomQ(room,players,answers);
   else if(s==='final')renderFinal(room,players,finals);
   else if(s==='ended')renderEnd(players,finals);
 }
@@ -626,6 +659,99 @@ async function hostNextStage(){
 }
 async function hostToFinal(){
   await sb.from('rooms').update({status:'final'}).eq('id',roomId);
+}
+
+// ─── 방장 커스텀 질문 ─────────────────────────────────────────────
+// 중간 로비 이동 버튼 → 커스텀 질문 화면으로
+let _customQDestIsLobby=true; // true=다음 스테이지 로비, false=최종선택
+async function hostGoCustomQ(){
+  _customQDestIsLobby=true;
+  await sb.from('rooms').update({status:'making_custom_q'}).eq('id',roomId);
+}
+async function hostGoCustomQFinal(){
+  _customQDestIsLobby=false;
+  await sb.from('rooms').update({status:'making_custom_q'}).eq('id',roomId);
+}
+function renderMakingCustomQ(room){
+  show('s-custom-q');
+  const cq=room.custom_q?JSON.parse(room.custom_q):null;
+  if(isHost){
+    document.getElementById('cq-choice').style.display='flex';
+    document.getElementById('cq-form').style.display='none';
+    document.getElementById('cq-wait').style.display='none';
+  } else {
+    document.getElementById('cq-choice').style.display='none';
+    document.getElementById('cq-form').style.display='none';
+    document.getElementById('cq-wait').style.display='block';
+  }
+}
+function showCustomQForm(){
+  document.getElementById('cq-choice').style.display='none';
+  document.getElementById('cq-form').style.display='flex';
+}
+async function hostPickRandomQ(){
+  // 아직 안 쓴 Q_POOL에서 랜덤 하나 선택
+  const {data:room}=await sb.from('rooms').select().eq('id',roomId).single();
+  const usedQs=getQs(room).flat().map(q=>q.q);
+  const unused=Q_POOL.filter(q=>!usedQs.includes(q.q));
+  const pool=unused.length>0?unused:Q_POOL;
+  const seed=new Date(room.created_at).getTime()&0xffffffff;
+  const picked=seededShuffle(pool,seed+12345)[0];
+  const cq={q:picked.q,A:picked.A,B:picked.B,skip:false};
+  await sb.from('rooms').update({custom_q:JSON.stringify(cq),status:'answering_custom_q'}).eq('id',roomId);
+}
+async function hostSubmitCustomQ(){
+  const q=document.getElementById('cq-qtxt').value.trim();
+  const A=document.getElementById('cq-atxt').value.trim();
+  const B=document.getElementById('cq-btxt').value.trim();
+  if(!q||!A||!B){toast('질문과 선택지 A, B를 모두 입력해주세요!');return;}
+  const cq={q,A,B,skip:false};
+  await sb.from('rooms').update({custom_q:JSON.stringify(cq),status:'answering_custom_q'}).eq('id',roomId);
+}
+async function hostSkipCustomQ(){
+  const {data:room}=await sb.from('rooms').select('stage').eq('id',roomId).single();
+  if(_customQDestIsLobby){
+    boardAnimRunning=false;
+    await sb.from('rooms').update({status:'lobby',stage:room.stage+1,question_idx:0,custom_q:null}).eq('id',roomId);
+  } else {
+    await sb.from('rooms').update({status:'final',custom_q:null}).eq('id',roomId);
+  }
+}
+let _cqAnswered=false;
+function renderAnsweringCustomQ(room,players,answers){
+  show('s-custom-qa');
+  const cq=room.custom_q?JSON.parse(room.custom_q):{q:'?',A:'A',B:'B'};
+  document.getElementById('cqa-q').textContent=cq.q;
+  const myAns=answers.find(a=>a.player_id===myId&&a.stage===99&&a.question_idx===0);
+  _cqAnswered=!!myAns;
+  document.getElementById('cqa-btns').innerHTML=`
+    <button onclick="submitCQAnswer('A')" style="width:100%;padding:14px;border:3px solid ${myAns?.choice==='A'?'#FFB5A7':'#eee'};border-radius:16px;background:${myAns?.choice==='A'?'#FFF0EE':'#fff'};cursor:pointer;font-weight:700;font-size:.95rem;color:#D45F5F;word-break:keep-all;transition:all .15s${myAns?';pointer-events:none':''}">
+      A. ${esc(cq.A)}</button>
+    <button onclick="submitCQAnswer('B')" style="width:100%;padding:14px;border:3px solid ${myAns?.choice==='B'?'#9DD9D2':'#eee'};border-radius:16px;background:${myAns?.choice==='B'?'#EDFAF8':'#fff'};cursor:pointer;font-weight:700;font-size:.95rem;color:#3A9E98;word-break:keep-all;transition:all .15s${myAns?';pointer-events:none':''}">
+      B. ${esc(cq.B)}</button>`;
+  document.getElementById('cqa-done').style.display=myAns?'block':'none';
+  const doneCount=players.filter(p=>answers.some(a=>a.player_id===p.id&&a.stage===99&&a.question_idx===0)).length;
+  document.getElementById('cqa-prog').textContent=`${doneCount}/${players.length}명 답변 완료`;
+  // 전원 답변 시 다음 단계로
+  if(doneCount===players.length&&players.length>0){
+    sb.from('rooms').select('stage').eq('id',roomId).single().then(({data:r})=>{
+      if(!r)return;
+      // 어디로 가야 하는지 custom_q에 dest 저장 안 했으니 stage 기준으로 판단
+      // stage >= STAGE_INTRO.length-1 이면 final, 아니면 lobby
+      const destFinal=r.stage>=(STAGE_INTRO.length-1);
+      if(destFinal){
+        sb.from('rooms').update({status:'final'}).eq('id',roomId).eq('status','answering_custom_q').then(()=>{});
+      } else {
+        boardAnimRunning=false;
+        sb.from('rooms').update({status:'lobby',stage:r.stage+1,question_idx:0}).eq('id',roomId).eq('status','answering_custom_q').then(()=>{});
+      }
+    });
+  }
+}
+async function submitCQAnswer(choice){
+  if(_cqAnswered)return;
+  _cqAnswered=true;
+  await sb.from('answers').upsert({room_id:roomId,player_id:myId,stage:99,question_idx:0,choice},{onConflict:'room_id,player_id,stage,question_idx'});
 }
 
 // ─── Final choice ─────────────────────────────────────────────────
