@@ -212,7 +212,7 @@ async function doCreate(){
   roomId=room.id;sessionStorage.setItem('roomId',roomId);
   isHost=true;
   await sb.from('players').insert({id:myId,room_id:roomId,name,is_host:true});
-  subscribeRoom();show('s-wait');
+  subscribeRoom();syncAndRender();
 }
 async function doJoin(){
   const name=document.getElementById('inp-name').value.trim();
@@ -225,7 +225,7 @@ async function doJoin(){
   roomId=room.id;sessionStorage.setItem('roomId',roomId);isHost=false;
   const {error:pe}=await sb.from('players').insert({id:myId,room_id:roomId,name,is_host:false});
   if(pe&&pe.code!=='23505'){toast('입장 실패 😢');console.error(pe);return;}
-  subscribeRoom();show('s-wait');
+  subscribeRoom();syncAndRender();
 }
 
 function subscribeRoom(){
