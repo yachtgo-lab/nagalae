@@ -331,8 +331,7 @@ function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
 // ===================== STATE =====================
 
 let G = {};
-let setupSel = {};   // playerIndex -> charId
-let readyKeys = {};  // stateKey -> bool
+let setupSel = {};
 let histOpen = false;
 
 function initState(n){
@@ -374,7 +373,6 @@ function goCharacter(){
   if(!chosenCount) return;
   initState(chosenCount);
   setupSel = {};
-  readyKeys = {};
   renderCharSetup();
   show('s-char');
 }
@@ -452,7 +450,6 @@ function confirmChars(){
   }
   G.players = players;
   G.stage = 0; G.qIdx = 0; G.pTurn = 0; G.answers = {};
-  readyKeys = {};
   renderQ();
   show('s-q');
 }
@@ -464,6 +461,20 @@ function totalQ(){ return QUESTIONS[G.stage].qs.length; }
 
 const CATS_ROTATE = ['🐱','🐈','😺','🙀','😸','🐾'];
 
+function playerStatusBar(){
+  return `<div style="display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+    ${G.players.map(p=>{
+      const done = G.answers[p.id]!==undefined;
+      return `<div style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;
+        background:${done?'rgba(157,217,210,.25)':'rgba(234,224,245,.4)'};
+        border:1.5px solid ${done?'rgba(157,217,210,.8)':'#EAE0F5'};
+        color:${done?'#5AADA4':'var(--muted)'}">
+        ${p.emoji} ${p.name} ${done?'✓':'…'}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
 function renderQ(){
   const q = curQ();
   const stage = G.stage;
@@ -471,7 +482,6 @@ function renderQ(){
   const total = totalQ();
   const allDone = Object.keys(G.answers).length === G.playerCount;
 
-  // Stage label & dots
   document.getElementById('q-stage-label').textContent = ['1단계','2단계','3단계'][stage];
   let dotsH='';
   for(let i=0;i<total;i++){
@@ -481,14 +491,8 @@ function renderQ(){
     dotsH+=`<div class="${cls}"></div>`;
   }
   document.getElementById('q-dots').innerHTML = dotsH;
-
-  // Progress
   document.getElementById('q-prog').style.width = (qi/total*100)+'%';
-
-  // Cat
   document.getElementById('q-cat').textContent = CATS_ROTATE[qi % CATS_ROTATE.length];
-
-  // Question
   document.getElementById('q-num').textContent = `${QUESTIONS[stage].stageName} • 질문 ${qi+1}/${total}`;
   document.getElementById('q-text').textContent = q.text;
 
@@ -498,48 +502,29 @@ function renderQ(){
 
   if(allDone){
     banner.style.display = 'none';
-    choicesDiv.innerHTML = `<div class="tc" style="padding:16px"><div style="font-size:34px;margin-bottom:8px">✅</div><div style="font-weight:700;color:var(--muted)">모두 선택 완료!</div></div>`;
-    actionDiv.innerHTML  = `<button class="btn btn-primary" onclick="revealAnswers()">선택 결과 공개! ✨</button>`;
+    choicesDiv.innerHTML = playerStatusBar() +
+      `<div class="tc" style="padding:12px 0"><div style="font-size:30px;margin-bottom:6px">✅</div>
+      <div style="font-weight:700;color:var(--muted)">모두 선택 완료!</div></div>`;
+    actionDiv.innerHTML = `<button class="btn btn-primary" onclick="revealAnswers()">선택 결과 공개! ✨</button>`;
     return;
   }
 
-  // Current player
+  // 현재 차례 플레이어
   const player = G.players[G.pTurn];
   banner.style.display = 'block';
   document.getElementById('q-p-emoji').textContent = player.emoji;
   document.getElementById('q-p-name').textContent  = player.name;
 
-  const stateKey = `q_${stage}_${qi}_${player.id}`;
-
-  if(!readyKeys[stateKey]){
-    const doneCount = Object.keys(G.answers).length;
-    choicesDiv.innerHTML = `
-      ${doneCount>0?`<div class="tc subtitle mb12" style="font-size:12px;margin-bottom:10px">${doneCount}/${G.playerCount}명 선택 완료</div>`:''}
-      <div class="cover">
-        <div style="font-size:30px;margin-bottom:8px">🤫</div>
-        <div style="font-weight:700;margin-bottom:4px">${player.name}님에게 기기를 넘겨주세요</div>
-        <div class="subtitle" style="font-size:12px">다른 사람은 화면을 보지 마세요!</div>
-      </div>`;
-    actionDiv.innerHTML = `<button class="btn btn-mint" onclick="setReady('${stateKey}')">${player.emoji} 준비됐어요!</button>`;
-  } else {
-    const doneCount = Object.keys(G.answers).length;
-    choicesDiv.innerHTML = `
-      ${doneCount>0?`<div class="tc subtitle mb12" style="font-size:12px;margin-bottom:10px">${doneCount}/${G.playerCount}명 선택 완료</div>`:''}
-      <button class="choice-btn" id="ca" onclick="pickAnswer('a')">
-        <div class="choice-badge badge-a">A</div>
-        <span>${q.a}</span>
-      </button>
-      <button class="choice-btn" id="cb" onclick="pickAnswer('b')">
-        <div class="choice-badge badge-b">B</div>
-        <span>${q.b}</span>
-      </button>`;
-    actionDiv.innerHTML = '';
-  }
-}
-
-function setReady(key){
-  readyKeys[key] = true;
-  renderQ();
+  choicesDiv.innerHTML = playerStatusBar() +
+    `<button class="choice-btn" onclick="pickAnswer('a')">
+      <div class="choice-badge badge-a">A</div>
+      <span>${q.a}</span>
+    </button>
+    <button class="choice-btn" onclick="pickAnswer('b')">
+      <div class="choice-badge badge-b">B</div>
+      <span>${q.b}</span>
+    </button>`;
+  actionDiv.innerHTML = '';
 }
 
 function pickAnswer(choice){
@@ -551,34 +536,39 @@ function pickAnswer(choice){
     question: q.text, choice, aText: q.a, bText: q.b
   });
 
-  // Show "done" state, then find next player
-  const choicesDiv = document.getElementById('q-choices');
-  choicesDiv.innerHTML = `
-    <div class="tc" style="padding:14px">
-      <div style="font-size:28px;margin-bottom:8px">✅</div>
-      <div style="font-weight:700;margin-bottom:4px">${player.name}님 선택 완료!</div>
-      <div class="subtitle" style="font-size:12px">기기를 넘겨주세요 🤫</div>
-    </div>`;
-
-  // Find next unanswered player
+  // 다음 미선택 플레이어 찾기
   let nextIdx = -1;
   for(let i=0;i<G.playerCount;i++){
     if(G.answers[G.players[i].id]===undefined){nextIdx=i;break;}
   }
 
-  const actionDiv = document.getElementById('q-action');
-  const banner    = document.getElementById('q-banner');
+  if(nextIdx===-1){
+    G.pTurn = 0;
+  } else {
+    G.pTurn = nextIdx;
+  }
+
+  // 짧은 딜레이 후 바로 다음 화면으로
+  const choicesDiv = document.getElementById('q-choices');
+  const actionDiv  = document.getElementById('q-action');
+  const banner     = document.getElementById('q-banner');
+
+  choicesDiv.innerHTML = playerStatusBar() +
+    `<div class="tc" style="padding:10px 0">
+      <div style="font-size:26px;margin-bottom:6px">✓</div>
+      <div style="font-weight:700;font-size:15px">${player.name}님 선택 완료!</div>
+    </div>`;
 
   if(nextIdx===-1){
-    // All done
     banner.style.display = 'none';
     actionDiv.innerHTML = `<button class="btn btn-primary" onclick="revealAnswers()">선택 결과 공개! ✨</button>`;
   } else {
     const nxt = G.players[nextIdx];
     document.getElementById('q-p-emoji').textContent = nxt.emoji;
     document.getElementById('q-p-name').textContent  = nxt.name;
-    G.pTurn = nextIdx;
-    actionDiv.innerHTML = `<button class="btn btn-mint" onclick="renderQ()">📱 ${nxt.name}님께 넘겨주기</button>`;
+    // 0.6초 후 자동으로 다음 플레이어 화면 전환
+    actionDiv.innerHTML = '';
+    setTimeout(()=>renderQ(), 600);
   }
 }
 
@@ -625,7 +615,6 @@ function nextQuestion(){
     G.qIdx++;
     G.answers = {};
     G.pTurn = 0;
-    // clear ready states for this question (keep others)
     renderQ();
     show('s-q');
   }
@@ -669,7 +658,6 @@ function nextFromLobby(){
     G.qIdx = 0;
     G.answers = {};
     G.pTurn = 0;
-    readyKeys = {};
     renderQ();
     show('s-q');
   }
@@ -891,7 +879,6 @@ function renderHistory(){
 function restartGame(){
   chosenCount = 0;
   setupSel = {};
-  readyKeys = {};
   histOpen = false;
   window.finReady = {};
   document.querySelectorAll('.count-btn').forEach(b=>b.classList.remove('sel'));
