@@ -443,10 +443,10 @@ async function startBoardAnim(stage,players,answers,room){
   inner.innerHTML='';
   const qs=getQs(room)[stage]||[];
   const N=qs.length;
-  const ROW=88; // px per question row
-  const PIECE=34; // piece size px
+  const ROW=130; // taller row to fit question text
+  const PIECE=34;
   const W=inner.parentElement.offsetWidth||340;
-  const totalH=N*ROW+80;
+  const totalH=N*ROW+90;
   inner.style.height=totalH+'px';
   inner.style.position='relative';
 
@@ -456,37 +456,41 @@ async function startBoardAnim(stage,players,answers,room){
   vline.style.cssText=`width:3px;top:0;height:${totalH}px`;
   inner.appendChild(vline);
 
-  // Draw nodes and branch lines per question
+  // Draw nodes, question text, branch lines, answer labels per question
   qs.forEach((q,qi)=>{
     const cy=qi*ROW+20;
+    // Question text above node
+    const qtxt=document.createElement('div');
+    qtxt.style.cssText=`position:absolute;left:50%;transform:translateX(-50%);top:${cy-2}px;white-space:nowrap;font-size:.7rem;font-weight:800;color:#7B5EA7;background:#fff;padding:3px 10px;border-radius:10px;border:1.5px solid #C8B6E2;z-index:4;max-width:${W*0.82}px;overflow:hidden;text-overflow:ellipsis`;
+    qtxt.textContent=`Q${qi+1}. ${q.q}`;
+    inner.appendChild(qtxt);
     // Node circle
     const nd=document.createElement('div');
     nd.className='bnode';
-    nd.style.cssText=`width:44px;height:44px;top:${cy}px`;
-    nd.textContent=`Q${qi+1}`;
+    nd.style.cssText=`width:36px;height:36px;top:${cy+22}px`;
+    nd.textContent=`${qi+1}`;
     inner.appendChild(nd);
-    // Branch lines (diagonal to A left, B right)
-    const branchY=cy+44,branchH=ROW-44;
+    // Branch lines
+    const branchY=cy+58,branchH=ROW-58;
     const la=document.createElement('div');
     la.className='bline-a';
-    la.style.cssText=`width:3px;height:${branchH}px;top:${branchY}px;left:${W*0.25-1.5}px;transform-origin:top center;transform:rotate(-8deg)`;
+    la.style.cssText=`width:3px;height:${branchH}px;top:${branchY}px;left:${W*0.25-1.5}px`;
     inner.appendChild(la);
-    const lb=document.createElement('div');
-    lb.className='bline-b';
-    lb.style.cssText=`width:3px;height:${branchH}px;top:${branchY}px;left:${W*0.75-1.5}px;transform-origin:top center;transform:rotate(8deg)`;
-    inner.appendChild(lb);
-    // A/B labels
+    const lb2=document.createElement('div');
+    lb2.className='bline-b';
+    lb2.style.cssText=`width:3px;height:${branchH}px;top:${branchY}px;left:${W*0.75-1.5}px`;
+    inner.appendChild(lb2);
+    // Answer labels (A = left, B = right) — shown after pieces split
+    const ansY=branchY+10;
     const lA=document.createElement('div');
-    lA.className='blbl-a';
-    lA.style.cssText=`top:${branchY+branchH/2-10}px;left:${W*0.12}px;opacity:0;transition:opacity .4s`;
+    lA.style.cssText=`position:absolute;top:${ansY}px;left:4px;width:${W*0.42}px;opacity:0;transition:opacity .4s;z-index:4`;
     lA.id=`bla-${qi}`;
-    lA.textContent=`A`;
+    lA.innerHTML=`<div style="background:#FFB5A7;color:#fff;border-radius:10px;padding:4px 8px;font-size:.68rem;font-weight:700;line-height:1.3;text-align:center">A<br>${esc(q.A)}</div>`;
     inner.appendChild(lA);
     const lB=document.createElement('div');
-    lB.className='blbl-b';
-    lB.style.cssText=`top:${branchY+branchH/2-10}px;right:${W*0.12-4}px;opacity:0;transition:opacity .4s`;
+    lB.style.cssText=`position:absolute;top:${ansY}px;right:4px;width:${W*0.42}px;opacity:0;transition:opacity .4s;z-index:4`;
     lB.id=`blb-${qi}`;
-    lB.textContent=`B`;
+    lB.innerHTML=`<div style="background:#9DD9D2;color:#fff;border-radius:10px;padding:4px 8px;font-size:.68rem;font-weight:700;line-height:1.3;text-align:center">B<br>${esc(q.B)}</div>`;
     inner.appendChild(lB);
   });
 
@@ -524,7 +528,7 @@ async function startBoardAnim(stage,players,answers,room){
     const offset=(i-(n-1)/2)*(PIECE+4);
     el.style.opacity='1';
     el.style.left=(W/2+offset-PIECE/2)+'px';
-    el.style.top=(20+2)+'px';
+    el.style.top=(60)+'px';
   });
 
   for(let qi=0;qi<N;qi++){
@@ -541,12 +545,12 @@ async function startBoardAnim(stage,players,answers,room){
       const ans=answers.find(a=>a.player_id===item.p.id&&a.stage===stage&&a.question_idx===qi);
       (ans?.choice==='A'?aGroup:bGroup).push(item);
     });
-    const branchY=qi*ROW+20+44+20;
+    const branchY=qi*ROW+78;
     placeGroup(aGroup,W*0.28,branchY);
     placeGroup(bGroup,W*0.72,branchY);
     await sleep(800);
     // Reconverge to next node or lobby
-    const nextY=qi<N-1?(qi+1)*ROW+20+2:N*ROW+44;
+    const nextY=qi<N-1?(qi+1)*ROW+60:N*ROW+60;
     pieceData.forEach(({el},i)=>{
       const offset=(i-(n-1)/2)*(PIECE+4);
       el.style.left=(W/2+offset-PIECE/2)+'px';
