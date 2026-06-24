@@ -2,891 +2,441 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>나랑 나갈래? 🏰</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>나랑 나갈래?</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --mint:#9DD9D2;--peach:#FFB5A7;--lav:#C8B6E2;--cream:#FFF8E7;--pink:#FFD6E7;--sky:#B8E4F9;
-  --text:#4A3F5C;--muted:#8A7AA0;
-  --shadow:0 8px 32px rgba(120,80,160,.12);--shadow-sm:0 4px 16px rgba(120,80,160,.08);
-  --r:22px;--r-sm:14px;
-}
-body{font-family:'Apple SD Gothic Neo','Segoe UI',sans-serif;background:linear-gradient(160deg,#E8F8F5 0%,#F3E8FF 45%,#FFF0F3 80%,#FFF8E7 100%);min-height:100vh;color:var(--text)}
-.screen{display:none;min-height:100vh;padding:20px 16px 48px;flex-direction:column;align-items:center;justify-content:flex-start;animation:fi .35s ease forwards}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Apple SD Gothic Neo',Pretendard,'Noto Sans KR',sans-serif;background:#FFF8E7;min-height:100vh;display:flex;align-items:center;justify-content:center}
+#app{width:100%;max-width:420px;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.screen{width:100%;display:none;flex-direction:column;align-items:center;gap:16px}
 .screen.active{display:flex}
-@keyframes fi{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-
-/* CARD */
-.card{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-radius:var(--r);box-shadow:var(--shadow);padding:26px 22px;width:100%;max-width:480px}
-
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 26px;border-radius:50px;border:none;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:-.3px;width:100%}
-.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.14)}
-.btn:active{transform:translateY(0)}
-.btn-primary{background:linear-gradient(135deg,#C8B6E2,#9DD9D2);color:#fff}
-.btn-peach{background:linear-gradient(135deg,#FFB5A7,#FFD6E7);color:#fff}
-.btn-mint{background:linear-gradient(135deg,#9DD9D2,#B8E4F9);color:#fff}
-.btn-outline{background:transparent;border:2px solid var(--lav);color:var(--text)}
-.btn-sm{padding:10px 18px;font-size:14px}
-
-/* CHOICE BUTTONS */
-.choice-btn{width:100%;background:rgba(255,255,255,.9);border:2.5px solid #EAE0F5;color:var(--text);border-radius:var(--r-sm);padding:18px 20px;font-size:15px;font-weight:600;text-align:left;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.choice-btn:hover{border-color:var(--lav);background:rgba(200,182,226,.1);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
-.choice-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
-.badge-a{background:rgba(157,217,210,.3);color:#5AADA4}
-.badge-b{background:rgba(255,181,167,.3);color:#D0705A}
-
-/* COUNT BUTTONS */
-.count-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}
-.count-btn{aspect-ratio:1;border-radius:12px;border:2.5px solid #EAE0F5;background:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--text)}
-.count-btn.sel{border-color:var(--lav);background:linear-gradient(135deg,rgba(200,182,226,.3),rgba(157,217,210,.3));color:#7A5FA0}
-
-/* CHARACTER CARDS */
-.char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0}
-.char-card{border-radius:var(--r-sm);border:2.5px solid #EAE0F5;background:#fff;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-.char-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-sm)}
-.char-card.sel{border-width:3px}
+h1{font-size:2rem;font-weight:900;color:#7B5EA7;text-align:center;line-height:1.2}
+h2{font-size:1.3rem;font-weight:800;color:#7B5EA7;text-align:center}
+p{font-size:.95rem;color:#555;text-align:center;line-height:1.6}
+input{width:100%;padding:14px 16px;border:2px solid #C8B6E2;border-radius:16px;font-size:1rem;background:#fff;outline:none;color:#333;text-align:center}
+input:focus{border-color:#7B5EA7}
+.btn{width:100%;padding:14px;border:none;border-radius:20px;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .1s,opacity .1s}
+.btn:active{transform:scale(.97)}
+.btn-pri{background:linear-gradient(135deg,#C8B6E2,#9DD9D2);color:#fff}
+.btn-sec{background:#fff;border:2px solid #C8B6E2;color:#7B5EA7}
+.btn-rose{background:linear-gradient(135deg,#FFB5A7,#ff9a88);color:#fff}
+.btn:disabled{opacity:.4;pointer-events:none}
+.card{background:#fff;border-radius:24px;padding:20px;width:100%;box-shadow:0 4px 20px rgba(200,182,226,.3)}
+.code-display{font-size:2.5rem;font-weight:900;letter-spacing:.15em;color:#7B5EA7;text-align:center;font-family:monospace}
+.player-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.85rem;font-weight:600}
+.status-bar{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;width:100%}
+.choice-btn{width:100%;padding:18px;border:3px solid transparent;border-radius:20px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .15s;background:#fff;color:#333}
+.choice-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.choice-btn.A{border-color:#FFB5A7}
+.choice-btn.A:hover:not(:disabled){background:#FFB5A7;color:#fff}
+.choice-btn.B{border-color:#9DD9D2}
+.choice-btn.B:hover:not(:disabled){background:#9DD9D2;color:#fff}
+.choice-btn.selected{opacity:.5;pointer-events:none}
+.choice-btn.picked-A{background:#FFB5A7;color:#fff;border-color:#FFB5A7}
+.choice-btn.picked-B{background:#9DD9D2;color:#fff;border-color:#9DD9D2}
+.waiting-msg{font-size:.9rem;color:#aaa;text-align:center;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.char-card{padding:12px 6px;border-radius:16px;border:3px solid transparent;text-align:center;cursor:pointer;transition:all .15s;background:#fff}
+.char-card:hover:not(.taken){transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.char-card.selected-me{border-color:#7B5EA7;background:#EEE8FA}
 .char-card.taken{opacity:.35;pointer-events:none}
-.taken-tag{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.1);border-radius:6px;font-size:9px;padding:2px 5px;color:var(--muted)}
-.char-emoji{font-size:38px;display:block;margin-bottom:5px}
-.char-label{font-size:11px;font-weight:700;color:var(--text)}
-
-/* INPUT */
-.name-input{width:100%;padding:11px 15px;border-radius:12px;border:2px solid #EAE0F5;font-size:15px;color:var(--text);background:#fff;transition:border-color .2s;margin-top:4px}
-.name-input:focus{outline:none;border-color:var(--lav)}
-
-/* STAGE DOTS */
-.stage-dots{display:flex;gap:7px}
-.s-dot{width:9px;height:9px;border-radius:50%;background:#EAE0F5;transition:all .3s}
-.s-dot.active{background:var(--lav);transform:scale(1.35)}
-.s-dot.done{background:var(--mint)}
-
-/* PROGRESS */
-.prog-wrap{width:100%;max-width:480px;background:rgba(200,182,226,.2);border-radius:4px;height:6px;margin-bottom:18px}
-.prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--lav),var(--mint));transition:width .4s ease}
-
-/* PLAYER BANNER */
-.player-banner{background:linear-gradient(135deg,rgba(200,182,226,.25),rgba(157,217,210,.25));border-radius:var(--r-sm);padding:14px 18px;text-align:center;width:100%;max-width:480px;margin-bottom:14px}
-.player-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:5px}
-
-/* COVER OVERLAY */
-.cover{background:linear-gradient(135deg,rgba(200,182,226,.35),rgba(157,217,210,.35));border-radius:var(--r-sm);padding:22px;text-align:center;border:2px dashed rgba(200,182,226,.6);margin-bottom:12px}
-
-/* REVEAL */
-.reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:480px;margin:14px 0}
-.rev-col{border-radius:var(--r-sm);padding:14px;text-align:center}
-.rev-a{background:rgba(157,217,210,.15);border:2px solid rgba(157,217,210,.45)}
-.rev-b{background:rgba(255,181,167,.15);border:2px solid rgba(255,181,167,.45)}
-.rev-title{font-size:12px;font-weight:700;margin-bottom:10px;color:var(--muted)}
-
-/* PLAYER CHIP */
-.chip{display:inline-flex;align-items:center;gap:5px;background:#fff;border-radius:20px;padding:5px 11px;margin:3px;font-size:12px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.07)}
-
-/* LOBBY */
-.lobby-players{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin:20px 0}
-.lp-avatar{display:flex;flex-direction:column;align-items:center;gap:4px}
-.avatar-bubble{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:var(--shadow-sm)}
-.prompt-box{background:rgba(200,182,226,.15);border-radius:var(--r-sm);padding:18px;margin:16px 0;border-left:4px solid var(--lav)}
-
-/* FINAL GRID */
-.final-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0;width:100%}
-.fp-card{border-radius:var(--r-sm);border:2.5px solid #EAE0F5;background:#fff;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s}
-.fp-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-sm)}
-.fp-card.sel{border-width:3px}
-.fp-card.dis{opacity:.3;pointer-events:none}
-
-/* ENDING */
-.couple-card{background:linear-gradient(135deg,rgba(255,181,167,.2),rgba(255,214,231,.25));border:2px solid rgba(255,181,167,.4);border-radius:var(--r);padding:22px;margin-bottom:12px;text-align:center}
-.solo-card{background:linear-gradient(135deg,rgba(157,217,210,.2),rgba(184,228,249,.2));border:2px solid rgba(157,217,210,.4);border-radius:var(--r);padding:22px;text-align:center}
-.couple-display{display:flex;align-items:center;justify-content:center;gap:18px;margin:14px 0}
-.cat-row{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;font-size:26px;margin:10px 0}
-
-/* HISTORY */
-.hist-item{background:rgba(248,245,255,.8);border-radius:10px;padding:9px 13px;margin-bottom:5px;font-size:13px}
-
-/* SETUP ITEM */
-.setup-item{background:#fff;border-radius:var(--r-sm);padding:16px;margin-bottom:12px;box-shadow:var(--shadow-sm)}
-
-/* SCROLL */
-.scroll-wrap{width:100%;max-width:480px;max-height:68vh;overflow-y:auto;padding-right:2px}
-
-/* UTILS */
-.tc{text-align:center}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.mw{width:100%;max-width:480px}
-.label{font-size:13px;color:var(--muted);font-weight:600}
-.subtitle{font-size:14px;color:var(--muted)}
-.divider{width:100%;max-width:480px;height:1px;background:rgba(200,182,226,.3);margin:16px 0}
-
-/* CASTLE ANIMATION */
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.castle{font-size:76px;animation:float 3s ease-in-out infinite;display:block;text-align:center;margin-bottom:12px}
-.game-title{font-size:34px;font-weight:900;background:linear-gradient(135deg,#C8B6E2,#9DD9D2,#FFB5A7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;text-align:center}
-
-@media(max-width:360px){.final-grid{grid-template-columns:repeat(2,1fr)}.char-grid{grid-template-columns:repeat(3,1fr)}.game-title{font-size:28px}}
+.char-emoji{font-size:2rem}
+.char-name{font-size:.75rem;font-weight:700;margin-top:4px;color:#555}
+.result-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:#f9f5ff;margin-bottom:8px}
+.match-badge{background:linear-gradient(135deg,#FFB5A7,#C8B6E2);color:#fff;padding:4px 10px;border-radius:10px;font-size:.8rem;font-weight:700}
+.divider{height:1px;background:#eee;width:100%;margin:4px 0}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 22px;border-radius:20px;font-size:.9rem;font-weight:600;z-index:999;pointer-events:none;animation:fadeup .3s ease}
+@keyframes fadeup{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.q-counter{font-size:.8rem;color:#aaa;text-align:center}
+.lobby-icon{font-size:3rem;text-align:center}
+.section-label{font-size:.75rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.08em;width:100%;text-align:left}
 </style>
 </head>
 <body>
+<div id="app">
 
-<!-- ===== SCREEN: START ===== -->
-<div id="s-start" class="screen active">
-  <div style="margin-top:32px;margin-bottom:24px">
-    <span class="castle">🏰</span>
-    <div class="game-title">나랑 나갈래?</div>
-    <div class="subtitle tc mt8" style="letter-spacing:1px">Will You Leave With Me?</div>
-  </div>
-
-  <div class="card">
-    <div style="font-size:32px;text-align:center;margin-bottom:10px">🐱</div>
-    <p class="tc subtitle mb16" style="line-height:1.7">성에 갇힌 공주들이 서로를 알아가며<br>함께 나갈 사람을 찾는 게임이에요!</p>
-    <div class="label mb8">플레이어 수를 선택하세요</div>
-    <div class="count-grid" id="countGrid">
-      <button class="count-btn" onclick="pickCount(2)">2</button>
-      <button class="count-btn" onclick="pickCount(3)">3</button>
-      <button class="count-btn" onclick="pickCount(4)">4</button>
-      <button class="count-btn" onclick="pickCount(5)">5</button>
-      <button class="count-btn" onclick="pickCount(6)">6</button>
-    </div>
-    <button class="btn btn-primary mt16" id="startBtn" onclick="goCharacter()" style="opacity:.45;pointer-events:none">🎲 게임 시작!</button>
-  </div>
-
-  <p class="subtitle tc mt16" style="max-width:300px;line-height:1.7">💡 3단계 질문으로 서로를 알아가고<br>마지막엔 함께 나갈 사람을 선택해요</p>
-</div>
-
-<!-- ===== SCREEN: CHARACTER ===== -->
-<div id="s-char" class="screen">
-  <h2 class="tc mb8" style="font-size:22px;font-weight:800">공주 캐릭터 선택 👸</h2>
-  <p class="subtitle tc mb16">각 플레이어의 이름과 캐릭터를 선택해주세요</p>
-  <div class="scroll-wrap" id="charSetupWrap"></div>
-  <div class="mw mt16">
-    <button class="btn btn-primary" onclick="confirmChars()">✨ 선택 완료! 게임 시작</button>
-  </div>
-</div>
-
-<!-- ===== SCREEN: QUESTION ===== -->
-<div id="s-q" class="screen">
-  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:480px;margin-bottom:8px">
-    <div id="q-stage-label" class="label"></div>
-    <div class="stage-dots" id="q-dots"></div>
-  </div>
-  <div class="prog-wrap"><div class="prog-fill" id="q-prog"></div></div>
-
-  <div class="card mb12" style="margin-bottom:12px" id="q-card">
-    <div id="q-cat" style="font-size:32px;text-align:center;margin-bottom:8px">🐱</div>
-    <div id="q-num" class="label mb8"></div>
-    <div id="q-text" style="font-size:19px;font-weight:700;line-height:1.55;margin-bottom:20px"></div>
-    <div id="q-choices"></div>
-  </div>
-
-  <div class="player-banner" id="q-banner">
-    <div class="player-row">
-      <span id="q-p-emoji" style="font-size:26px"></span>
-      <div><div id="q-p-name" style="font-weight:700;font-size:16px"></div><div class="subtitle" style="font-size:12px">의 차례예요</div></div>
-    </div>
-    <p class="subtitle" style="font-size:12px">🐱 화면을 보여주고 선택하게 해주세요!</p>
-  </div>
-
-  <div class="mw" id="q-action"></div>
-</div>
-
-<!-- ===== SCREEN: REVEAL ===== -->
-<div id="s-reveal" class="screen">
-  <div style="font-size:40px;text-align:center;margin:16px 0 8px">🎉</div>
-  <h2 class="tc mb8" style="font-size:21px">선택 결과 공개!</h2>
-
-  <div class="card mw mb12" style="margin-bottom:12px">
-    <div class="label mb8">이번 질문</div>
-    <div id="rv-q-text" style="font-weight:700;font-size:16px;line-height:1.5"></div>
-  </div>
-
-  <div class="reveal-grid" id="rv-grid"></div>
-
-  <div class="mw">
-    <button class="btn btn-primary" id="rv-next-btn" onclick="nextQuestion()">다음 질문 →</button>
-  </div>
-</div>
-
-<!-- ===== SCREEN: LOBBY ===== -->
-<div id="s-lobby" class="screen">
-  <div class="card mw tc">
-    <div id="lb-emoji" style="font-size:48px;margin-bottom:14px">🏰</div>
-    <h2 id="lb-title" style="font-size:22px;font-weight:800"></h2>
-    <p class="subtitle mt8" id="lb-sub"></p>
-    <div class="lobby-players" id="lb-players"></div>
-    <div class="prompt-box">
-      <div style="font-size:12px;font-weight:700;color:#7A5FA0;margin-bottom:7px">🐱 대화 주제</div>
-      <div id="lb-prompt" style="font-size:15px;font-weight:600;line-height:1.55"></div>
-    </div>
-    <p class="subtitle mt12" style="font-size:13px">서로 이야기 나눠보세요! 준비되면 다음으로 이동해요</p>
-    <button class="btn btn-primary mt20" id="lb-next-btn" onclick="nextFromLobby()">다음 단계로 →</button>
-  </div>
-</div>
-
-<!-- ===== SCREEN: FINAL SELECTION ===== -->
-<div id="s-final" class="screen">
-  <div class="card mw tc mb12" style="margin-bottom:12px">
-    <div style="font-size:46px;margin-bottom:8px">🚪✨</div>
-    <h2 style="font-size:21px;font-weight:800">최종 선택</h2>
-    <p class="subtitle mt8" style="line-height:1.65;font-size:14px">성을 함께 나가고 싶은 사람을<br>한 명 비밀 선택해주세요</p>
-  </div>
-
-  <div class="player-banner" id="fin-banner">
-    <div class="player-row">
-      <span id="fin-emoji" style="font-size:26px"></span>
-      <div><div id="fin-name" style="font-weight:700;font-size:16px"></div><div class="subtitle" style="font-size:12px">의 비밀 선택</div></div>
+  <!-- 랜딩 -->
+  <div id="s-land" class="screen active">
+    <div style="font-size:3.5rem;text-align:center">👸</div>
+    <h1>나랑 나갈래?</h1>
+    <p style="color:#aaa;font-size:.85rem">함께 플레이할 친구들과<br>각자 폰으로 접속하세요</p>
+    <div class="card" style="gap:12px;display:flex;flex-direction:column">
+      <input id="inp-name" placeholder="내 이름을 입력해요" maxlength="8">
+      <button class="btn btn-pri" onclick="doCreate()">방 만들기 👑</button>
+      <div style="display:flex;align-items:center;gap:8px"><div class="divider"></div><span style="color:#ccc;font-size:.8rem;white-space:nowrap">또는</span><div class="divider"></div></div>
+      <input id="inp-code" placeholder="초대 코드 6자리" maxlength="6" style="text-transform:uppercase;letter-spacing:.15em" oninput="this.value=this.value.toUpperCase()">
+      <button class="btn btn-sec" onclick="doJoin()">입장하기 🚪</button>
     </div>
   </div>
 
-  <div class="mw" id="fin-area"></div>
-  <div class="mw mt12" id="fin-action"></div>
-</div>
-
-<!-- ===== SCREEN: FINAL REVEAL ===== -->
-<div id="s-freveal" class="screen">
-  <div id="fr-emoji" style="font-size:58px;text-align:center;margin:20px 0 10px">💕</div>
-  <h2 class="tc mb16" style="font-size:22px">최종 선택 공개!</h2>
-  <div class="mw" id="fr-content"></div>
-  <div class="mw mt16">
-    <button class="btn btn-primary" onclick="goEnding()">엔딩 보기 🏰</button>
+  <!-- 대기실 -->
+  <div id="s-wait" class="screen">
+    <h2>대기실</h2>
+    <div class="card" style="text-align:center">
+      <div style="font-size:.8rem;color:#aaa;margin-bottom:4px">초대 코드</div>
+      <div class="code-display" id="room-code">------</div>
+      <div style="font-size:.75rem;color:#bbb;margin-top:4px">친구에게 코드를 알려주세요</div>
+    </div>
+    <div class="card">
+      <div class="section-label" style="margin-bottom:10px">참가자 <span id="player-count">0</span>명</div>
+      <div id="player-list" class="status-bar"></div>
+    </div>
+    <div class="card">
+      <div class="section-label" style="margin-bottom:10px">캐릭터 선택</div>
+      <div class="char-grid" id="char-grid"></div>
+    </div>
+    <button id="btn-start" class="btn btn-pri" onclick="hostStart()" style="display:none">게임 시작 🎮</button>
+    <p class="waiting-msg" id="wait-msg">호스트가 게임을 시작하면 시작돼요</p>
   </div>
-</div>
 
-<!-- ===== SCREEN: ENDING ===== -->
-<div id="s-ending" class="screen">
-  <div style="font-size:54px;text-align:center;margin:20px 0 8px">🎊</div>
-  <h2 class="tc mb16" style="font-size:22px">게임 종료!</h2>
-  <div class="mw" id="end-couples"></div>
-  <div class="mw mt12" id="end-solos"></div>
-  <div class="divider"></div>
-  <div class="mw">
-    <button class="btn btn-outline mb12" style="margin-bottom:10px" onclick="toggleHistory()">📋 선택 히스토리 보기</button>
-    <div id="hist-wrap" style="display:none"></div>
+  <!-- 질문 -->
+  <div id="s-q" class="screen">
+    <div class="card" style="gap:10px;display:flex;flex-direction:column;align-items:center">
+      <div class="q-counter" id="q-counter"></div>
+      <h2 id="q-text" style="font-size:1.1rem;word-break:keep-all"></h2>
+    </div>
+    <div class="status-bar" id="q-status-bar"></div>
+    <div style="width:100%;display:flex;flex-direction:column;gap:10px">
+      <button id="btn-A" class="choice-btn A" onclick="submitAnswer('A')"></button>
+      <button id="btn-B" class="choice-btn B" onclick="submitAnswer('B')"></button>
+    </div>
+    <p class="waiting-msg" id="q-wait" style="display:none">다른 플레이어를 기다리는 중…</p>
   </div>
-  <div class="mw mt12">
-    <button class="btn btn-peach" onclick="restartGame()">🔄 다시 하기</button>
-  </div>
-</div>
 
+  <!-- 결과 (단계) -->
+  <div id="s-rev" class="screen">
+    <h2 id="rev-title"></h2>
+    <div id="rev-list" style="width:100%"></div>
+    <button id="btn-next-q" class="btn btn-sec" onclick="hostNextQ()" style="display:none">다음 질문 ▶</button>
+    <button id="btn-next-stage" class="btn btn-pri" onclick="hostNextStage()" style="display:none">다음 라운드 🌸</button>
+    <button id="btn-to-final" class="btn btn-rose" onclick="hostToFinal()" style="display:none">최종 선택으로 💌</button>
+    <p class="waiting-msg" id="rev-wait">호스트가 진행합니다…</p>
+  </div>
+
+  <!-- 로비 (스테이지 간) -->
+  <div id="s-lobby" class="screen">
+    <div class="lobby-icon" id="lobby-icon">✨</div>
+    <h2 id="lobby-title"></h2>
+    <p id="lobby-msg" style="word-break:keep-all;white-space:pre-line"></p>
+    <button id="btn-lobby-go" class="btn btn-pri" onclick="hostStartStage()" style="display:none">시작! 🎯</button>
+    <p class="waiting-msg" id="lobby-wait">호스트가 시작하면 시작돼요</p>
+  </div>
+
+  <!-- 최종 선택 -->
+  <div id="s-final" class="screen">
+    <h2>최종 선택 💌</h2>
+    <p style="word-break:keep-all">함께 나가고 싶은 사람을<br>한 명 선택해요!</p>
+    <div id="final-list" style="width:100%;display:flex;flex-direction:column;gap:10px"></div>
+    <div class="status-bar" id="final-status-bar" style="margin-top:8px"></div>
+    <p class="waiting-msg" id="final-wait" style="display:none">모두 선택할 때까지 기다려요…</p>
+  </div>
+
+  <!-- 최종 결과 -->
+  <div id="s-end" class="screen">
+    <h2>💘 결과 발표</h2>
+    <div id="end-content" style="width:100%"></div>
+    <button class="btn btn-sec" onclick="location.reload()">다시 하기 🔄</button>
+  </div>
+
+</div>
 <script>
-// ===================== DATA =====================
+const SUPABASE_URL = 'https://gdbycodzgooqacukxwjl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkYnljb2R6Z29vcWFjdWt4d2psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMDA5OTYsImV4cCI6MjA5Nzg3Njk5Nn0.pyxwi2cMK1tfEEdRi5jJ1mqUCKKhpJh1XPsM3Z5MeHc';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CHARS = [
-  {id:0,emoji:'👸',name:'로즈',  color:'#FFB5A7',bg:'linear-gradient(135deg,#FFB5A7,#FFD6E7)'},
-  {id:1,emoji:'🧝‍♀️',name:'민트',  color:'#9DD9D2',bg:'linear-gradient(135deg,#9DD9D2,#B8E4F9)'},
-  {id:2,emoji:'🧙‍♀️',name:'비올렛',color:'#C8B6E2',bg:'linear-gradient(135deg,#C8B6E2,#E8D5F5)'},
-  {id:3,emoji:'🌙',name:'루나',  color:'#B0B0D8',bg:'linear-gradient(135deg,#B0B0D8,#D8D8EE)'},
-  {id:4,emoji:'🌸',name:'피치',  color:'#FFD6A5',bg:'linear-gradient(135deg,#FFD6A5,#FFF0C8)'},
-  {id:5,emoji:'⭐',name:'스텔라',color:'#F0D060',bg:'linear-gradient(135deg,#F0D060,#FFF3C0)'},
+  {id:0,name:'로즈',emoji:'🌹',color:'#FFB5A7',bg:'#FFF0ED'},
+  {id:1,name:'민트',emoji:'🌿',color:'#9DD9D2',bg:'#EDFAF8'},
+  {id:2,name:'라벤더',emoji:'💜',color:'#C8B6E2',bg:'#F3EEFF'},
+  {id:3,name:'선샤인',emoji:'☀️',color:'#FFD97D',bg:'#FFFAED'},
+  {id:4,name:'오션',emoji:'🌊',color:'#80B4FF',bg:'#EEF4FF'},
+  {id:5,name:'체리',emoji:'🍒',color:'#FF8FAB',bg:'#FFF0F3'},
+];
+
+const STAGES = [
+  {label:'1라운드 — 첫인상',icon:'👀',msg:'서로의 첫인상을 확인해봐요!\n각자 솔직하게 선택하세요.'},
+  {label:'2라운드 — 취향 탐색',icon:'🔍',msg:'취향이 맞는 사람을 찾아봐요!\n깊이 있는 선택을 해보세요.'},
+  {label:'3라운드 — 최후의 선택',icon:'💎',msg:'이제 마음을 결정할 시간!\n진짜 마음을 보여주세요.'},
 ];
 
 const QUESTIONS = [
-  {
-    stageName:'1단계: 나를 알아가기 🌱',
-    qs:[
-      {text:'나와 더 잘 맞는 사람은?',           a:'나와 비슷한 사람',         b:'나와 다른 사람'},
-      {text:'트렌드에 대한 나의 태도는?',          a:'유행을 따라가는 편',       b:'나만의 취향을 지키는 편'},
-      {text:'나의 생활 스타일은?',                a:'계획을 꼼꼼히 세우는 편',  b:'즉흥적으로 움직이는 편'},
-      {text:'이상적인 주말은?',                   a:'집에서 푹 쉬기',           b:'어딘가 나가서 활동하기'},
-    ]
-  },
-  {
-    stageName:'2단계: 연애 & 데이트 💕',
-    qs:[
-      {text:'자기 전 연인과 연락한다면?',          a:'목소리 듣고 싶어, 통화!',  b:'따뜻한 문자로 마무리'},
-      {text:'더 설레는 데이트는?',                a:'집에서 둘만 있는 시간',    b:'활동적인 야외 데이트'},
-      {text:'연인과 밥을 먹는다면?',               a:'같이 요리 만들어 먹기',    b:'유명한 맛집 찾아가기'},
-      {text:'연인과의 연락 패턴은?',               a:'일상 모든 것을 공유하고 싶어',b:'하루 끝에 이야기해도 괜찮아'},
-      {text:'연인과 다퉜을 때 나는?',              a:'지금 당장 얘기하고 싶어',  b:'감정 정리 후 얘기하고 싶어'},
-    ]
-  },
-  {
-    stageName:'3단계: 미래와 가치관 🌟',
-    qs:[
-      {text:'연인과의 미래를 상상한다면?',          a:'함께 하나의 가족이 되는 것',b:'각자의 삶을 가진 동반자'},
-      {text:'연인과 함께 사는 삶은?',              a:'자연스럽게 원해',           b:'꼭 필요하진 않아'},
-      {text:'연애에서 더 중요한 것은?',             a:'두근거리는 설렘',          b:'편안한 안정감'},
-      {text:'나에게 연인이란?',                    a:'가장 친한 친구 같은 존재', b:'언제나 특별하고 설레는 존재'},
-    ]
-  }
+  [
+    {q:'주말에 어디가 더 좋아?',A:'🏠 집에서 넷플릭스',B:'🌿 야외 나들이'},
+    {q:'첫 데이트 장소는?',A:'☕ 감성 카페',B:'🍽️ 분위기 좋은 레스토랑'},
+    {q:'연락 스타일은?',A:'💬 자주 자주',B:'🌙 필요할 때만'},
+    {q:'이상형 분위기는?',A:'😊 친근하고 밝은',B:'😎 차분하고 깊은'},
+  ],
+  [
+    {q:'여행 스타일은?',A:'🗺️ 꼼꼼한 계획파',B:'🎲 즉흥 자유여행'},
+    {q:'데이트할 때 밥은?',A:'🔥 새로운 맛집 도전',B:'🏠 집에서 요리'},
+    {q:'싸웠을 때는?',A:'💬 바로 대화로 해결',B:'🌬️ 시간이 필요해'},
+    {q:'영화는?',A:'😂 웃기고 가벼운 코미디',B:'😭 깊고 울리는 드라마'},
+    {q:'선물 스타일은?',A:'🎁 깜짝 서프라이즈',B:'🛍️ 원하는 거 직접'},
+  ],
+  [
+    {q:'10년 후 모습은?',A:'🏙️ 도시에서 커리어',B:'🌄 여유로운 시골'},
+    {q:'사랑의 언어는?',A:'🗣️ 말로 표현',B:'🤝 행동으로 표현'},
+    {q:'고민이 생기면?',A:'👥 친구에게 털어놓기',B:'🧘 혼자 정리하기'},
+    {q:'인생에서 더 중요한 건?',A:'💪 성취와 목표',B:'❤️ 관계와 감정'},
+  ],
 ];
 
-const LOBBY_PROMPTS = [
-  ['방금 질문 중 가장 인상 깊었던 건 뭐예요?','예상치 못한 답변이 있었나요?','서로 비슷한 점, 달랐던 점이 뭔지 얘기해봐요!'],
-  ['데이트 스타일에서 제일 놀라운 답변은?','어떤 선택이 제일 공감됐나요?','같은 선택을 한 사람을 발견했나요?'],
-  ['미래에 대한 생각이 비슷한 사람이 있었나요?','가장 신중하게 고른 질문은 뭐예요?','이야기 나누고 싶은 주제가 생겼나요?'],
-  ['모든 질문을 통해 가장 기억에 남는 순간은?','상대방에게 물어보고 싶은 게 생겼나요?','지금까지 대화하며 어떤 인상을 받았나요?'],
-];
-
-const CAT_QUOTES = [
-  '괜찮아요! 고양이들이 제일 좋은 동반자거든요 🐾',
-  '솔로도 멋져요! 고양이와 함께라면 더욱더! 🐱',
-  '고양이들이 기다리고 있었어요. 이건 운명이에요! 🐈',
-  '지금은 자유로운 공주의 시간! ✨',
-  '고양이 6마리가 환영해요! 이게 진짜 행복 🐱🐱🐱',
-];
-const CATS = ['🐱','🐈','🐈‍⬛','😺','😸','🙀'];
-const CAT_EMOJIS = ['🐱','🐈','🐈‍⬛','😺','😸','🙀'];
-
-function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
-
-// ===================== STATE =====================
-
-let G = {};
-let setupSel = {};
-let histOpen = false;
-
-function initState(n){
-  G = {
-    playerCount: n,
-    players: [],       // {id,name,charId,emoji,color,bg,choices:[[[],[],[]]}
-    stage: 0,
-    qIdx: 0,
-    pTurn: 0,          // current player index for question answering
-    answers: {},       // playerId -> 'a'|'b'
-    finalChoices: {},  // playerId -> targetPlayerId
-    finPIdx: 0,        // current player index for final selection
-    couples: [],
-    solos: [],
-  };
-}
-
-// ===================== SCREENS =====================
+let myId = sessionStorage.getItem('myId');
+if(!myId){myId=crypto.randomUUID();sessionStorage.setItem('myId',myId);}
+let roomId = sessionStorage.getItem('roomId') || null;
+let channel = null;
+let isHost = false;
 
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
+}
+function toast(msg,dur=2000){
+  const el=document.createElement('div');el.className='toast';el.textContent=msg;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),dur);
+}
+function randCode(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r='';for(let i=0;i<6;i++)r+=c[Math.floor(Math.random()*c.length)];return r;
+}
+function charOf(id){return CHARS.find(c=>c.id===id)||{name:'?',emoji:'❓',color:'#ccc',bg:'#f9f9f9'};}
+
+async function doCreate(){
+  const name=document.getElementById('inp-name').value.trim();
+  if(!name){toast('이름을 입력해주세요!');return;}
+  const code=randCode();
+  const {data:room,error}=await sb.from('rooms').insert({code,host_id:myId}).select().single();
+  if(error){toast('방 생성 실패 😢');console.error(error);return;}
+  roomId=room.id;sessionStorage.setItem('roomId',roomId);
+  isHost=true;
+  await sb.from('players').insert({id:myId,room_id:roomId,name,is_host:true});
+  subscribeRoom();show('s-wait');
+}
+async function doJoin(){
+  const name=document.getElementById('inp-name').value.trim();
+  const code=document.getElementById('inp-code').value.trim().toUpperCase();
+  if(!name){toast('이름을 입력해주세요!');return;}
+  if(code.length!==6){toast('코드 6자리를 입력해주세요!');return;}
+  const {data:room,error}=await sb.from('rooms').select().eq('code',code).single();
+  if(error||!room){toast('방을 찾을 수 없어요 😢');return;}
+  if(room.status!=='waiting'){toast('이미 시작된 게임이에요!');return;}
+  roomId=room.id;sessionStorage.setItem('roomId',roomId);isHost=false;
+  const {error:pe}=await sb.from('players').insert({id:myId,room_id:roomId,name,is_host:false});
+  if(pe&&pe.code!=='23505'){toast('입장 실패 😢');console.error(pe);return;}
+  subscribeRoom();show('s-wait');
 }
 
-// ===================== START SCREEN =====================
-
-let chosenCount = 0;
-
-function pickCount(n){
-  chosenCount = n;
-  document.querySelectorAll('.count-btn').forEach((b,i)=>b.classList.toggle('sel',i+2===n));
-  const btn = document.getElementById('startBtn');
-  btn.style.opacity = '1';
-  btn.style.pointerEvents = 'auto';
+function subscribeRoom(){
+  if(channel)sb.removeChannel(channel);
+  channel=sb.channel('room:'+roomId);
+  ['rooms','players','answers','final_choices'].forEach(tbl=>{
+    channel.on('postgres_changes',{event:'*',schema:'public',table:tbl,filter:`${tbl==='rooms'?'id':'room_id'}=eq.${roomId}`},()=>syncAndRender());
+  });
+  channel.subscribe();
 }
 
-function goCharacter(){
-  if(!chosenCount) return;
-  initState(chosenCount);
-  setupSel = {};
-  renderCharSetup();
-  show('s-char');
+async function syncAndRender(){
+  if(!roomId)return;
+  const [r1,r2,r3,r4]=await Promise.all([
+    sb.from('rooms').select().eq('id',roomId).single(),
+    sb.from('players').select().eq('room_id',roomId).order('joined_at'),
+    sb.from('answers').select().eq('room_id',roomId),
+    sb.from('final_choices').select().eq('room_id',roomId),
+  ]);
+  const room=r1.data,players=r2.data||[],answers=r3.data||[],finals=r4.data||[];
+  if(!room)return;
+  const me=players.find(p=>p.id===myId)||{};
+  isHost=me.is_host||false;
+  const s=room.status;
+  if(s==='waiting')renderWait(room,players,me);
+  else if(s==='lobby')renderLobby(room);
+  else if(s==='question')renderQ(room,players,answers);
+  else if(s==='reveal')renderRev(room,players,answers);
+  else if(s==='final')renderFinal(room,players,finals);
+  else if(s==='ended')renderEnd(players,finals);
 }
 
-// ===================== CHARACTER SCREEN =====================
-
-function renderCharSetup(){
-  let html = '';
-  for(let i=0;i<G.playerCount;i++){
-    html += `<div class="setup-item">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#C8B6E2,#9DD9D2);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:13px">${i+1}</div>
-        <div style="font-weight:700">플레이어 ${i+1}</div>
-      </div>
-      <div class="label mb8" style="margin-bottom:5px">이름</div>
-      <input class="name-input" id="ni${i}" placeholder="이름을 입력해주세요" maxlength="8">
-      <div class="label mt12 mb8" style="margin-top:12px;margin-bottom:6px">캐릭터 선택</div>
-      <div class="char-grid" id="cg${i}">
-        ${CHARS.map(c=>`
-          <div class="char-card" id="cc${i}_${c.id}" onclick="pickChar(${i},${c.id})">
-            <span class="char-emoji">${c.emoji}</span>
-            <div class="char-label">${c.name}</div>
-          </div>
-        `).join('')}
-      </div>
+function renderWait(room,players,me){
+  show('s-wait');
+  document.getElementById('room-code').textContent=room.code;
+  document.getElementById('player-count').textContent=players.length;
+  const taken=players.filter(p=>p.char_id>=0).map(p=>p.char_id);
+  document.getElementById('player-list').innerHTML=players.map(p=>{
+    const c=charOf(p.char_id);
+    return `<div class="player-chip" style="background:${p.char_id>=0?c.bg:'#f5f5f5'};color:${p.char_id>=0?c.color:'#bbb'}">
+      ${p.char_id>=0?c.emoji:'👤'} ${p.name}${p.is_host?' 👑':''}
     </div>`;
-  }
-  document.getElementById('charSetupWrap').innerHTML = html;
+  }).join('');
+  document.getElementById('char-grid').innerHTML=CHARS.map(c=>{
+    const isMine=me.char_id===c.id;
+    const isTaken=taken.includes(c.id)&&!isMine;
+    return `<div class="char-card ${isMine?'selected-me':''} ${isTaken?'taken':''}" onclick="selectChar(${c.id})" style="border-color:${isMine?c.color:'transparent'}">
+      <div class="char-emoji">${c.emoji}</div>
+      <div class="char-name">${c.name}</div>
+      ${isTaken?'<div style="font-size:.65rem;color:#bbb">선택됨</div>':''}
+    </div>`;
+  }).join('');
+  const ready=players.every(p=>p.char_id>=0)&&players.length>=2;
+  document.getElementById('btn-start').style.display=isHost?'block':'none';
+  document.getElementById('btn-start').disabled=!ready;
+  document.getElementById('btn-start').textContent=ready?'게임 시작 🎮':`게임 시작 (${players.filter(p=>p.char_id>=0).length}/${players.length} 선택됨)`;
+  document.getElementById('wait-msg').style.display=isHost?'none':'block';
+}
+async function selectChar(charId){
+  await sb.from('players').update({char_id:charId,emoji:CHARS[charId].emoji,color:CHARS[charId].color,bg:CHARS[charId].bg}).eq('room_id',roomId).eq('id',myId);
+}
+async function hostStart(){
+  await sb.from('rooms').update({status:'lobby',stage:0}).eq('id',roomId);
 }
 
-function pickChar(pi, cid){
-  for(let i=0;i<G.playerCount;i++){
-    if(i!==pi && setupSel[i]===cid) return;
-  }
-  if(setupSel[pi]!==undefined){
-    const prev = document.getElementById(`cc${pi}_${setupSel[pi]}`);
-    if(prev){prev.classList.remove('sel');prev.style.borderColor='';}
-  }
-  setupSel[pi] = cid;
-  const card = document.getElementById(`cc${pi}_${cid}`);
-  card.classList.add('sel');
-  card.style.borderColor = CHARS[cid].color;
-  refreshTaken();
+function renderLobby(room){
+  show('s-lobby');
+  const stg=STAGES[room.stage]||{icon:'✨',label:'준비됐나요?',msg:'게임을 시작해요!'};
+  document.getElementById('lobby-icon').textContent=stg.icon;
+  document.getElementById('lobby-title').textContent=stg.label;
+  document.getElementById('lobby-msg').textContent=stg.msg;
+  document.getElementById('btn-lobby-go').style.display=isHost?'block':'none';
+  document.getElementById('lobby-wait').style.display=isHost?'none':'block';
+}
+async function hostStartStage(){
+  await sb.from('rooms').update({status:'question',question_idx:0}).eq('id',roomId);
 }
 
-function refreshTaken(){
-  const taken = Object.values(setupSel);
-  for(let i=0;i<G.playerCount;i++){
-    CHARS.forEach(c=>{
-      const el = document.getElementById(`cc${i}_${c.id}`);
-      if(!el) return;
-      const isTaken = taken.includes(c.id) && setupSel[i]!==c.id;
-      el.classList.toggle('taken', isTaken);
-      let tTag = el.querySelector('.taken-tag');
-      if(isTaken && !tTag){
-        tTag = document.createElement('div');
-        tTag.className = 'taken-tag';
-        tTag.textContent = '선택됨';
-        el.appendChild(tTag);
-      } else if(!isTaken && tTag){
-        tTag.remove();
-      }
-    });
-  }
-}
-
-function confirmChars(){
-  const players = [];
-  for(let i=0;i<G.playerCount;i++){
-    const name = (document.getElementById(`ni${i}`)?.value||'').trim();
-    if(!name){alert(`플레이어 ${i+1}의 이름을 입력해주세요!`);document.getElementById(`ni${i}`)?.focus();return;}
-    if(setupSel[i]===undefined){alert(`플레이어 ${i+1}의 캐릭터를 선택해주세요!`);return;}
-    const c = CHARS[setupSel[i]];
-    players.push({id:i,name,charId:c.id,emoji:c.emoji,color:c.color,bg:c.bg,choices:[[],[],[]]});
-  }
-  G.players = players;
-  G.stage = 0; G.qIdx = 0; G.pTurn = 0; G.answers = {};
-  renderQ();
+function renderQ(room,players,answers){
   show('s-q');
+  const stage=room.stage,qi=room.question_idx;
+  const qs=QUESTIONS[stage]||[];
+  const q=qs[qi];if(!q)return;
+  document.getElementById('q-counter').textContent=`${STAGES[stage]?.label||'질문'} · ${qi+1}/${qs.length}`;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('btn-A').textContent=q.A;
+  document.getElementById('btn-B').textContent=q.B;
+  const myAns=answers.find(a=>a.player_id===myId&&a.stage===stage&&a.question_idx===qi);
+  const btnA=document.getElementById('btn-A'),btnB=document.getElementById('btn-B');
+  if(myAns){
+    btnA.className='choice-btn A'+(myAns.choice==='A'?' picked-A selected':'');
+    btnB.className='choice-btn B'+(myAns.choice==='B'?' picked-B selected':'');
+    document.getElementById('q-wait').style.display='block';
+  } else {
+    btnA.className='choice-btn A';btnB.className='choice-btn B';
+    document.getElementById('q-wait').style.display='none';
+  }
+  document.getElementById('q-status-bar').innerHTML=players.map(p=>{
+    const done=answers.some(a=>a.player_id===p.id&&a.stage===stage&&a.question_idx===qi);
+    const c=charOf(p.char_id);
+    return `<div class="player-chip" style="background:${done?c.bg:'#f5f5f5'};color:${done?c.color:'#bbb'}">${c.emoji} ${p.name} ${done?'✓':'…'}</div>`;
+  }).join('');
+  const allDone=players.every(p=>answers.some(a=>a.player_id===p.id&&a.stage===stage&&a.question_idx===qi));
+  if(allDone&&myAns){
+    sb.from('rooms').update({status:'reveal'}).eq('id',roomId).eq('status','question').then(()=>{});
+  }
+}
+async function submitAnswer(choice){
+  const {data:room}=await sb.from('rooms').select('stage,question_idx').eq('id',roomId).single();
+  await sb.from('answers').upsert({room_id:roomId,player_id:myId,stage:room.stage,question_idx:room.question_idx,choice},{onConflict:'room_id,player_id,stage,question_idx'});
 }
 
-// ===================== QUESTION SCREEN =====================
-
-function curQ(){ return QUESTIONS[G.stage].qs[G.qIdx]; }
-function totalQ(){ return QUESTIONS[G.stage].qs.length; }
-
-const CATS_ROTATE = ['🐱','🐈','😺','🙀','😸','🐾'];
-
-function playerStatusBar(){
-  return `<div style="display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:16px">
-    ${G.players.map(p=>{
-      const done = G.answers[p.id]!==undefined;
-      return `<div style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;
-        background:${done?'rgba(157,217,210,.25)':'rgba(234,224,245,.4)'};
-        border:1.5px solid ${done?'rgba(157,217,210,.8)':'#EAE0F5'};
-        color:${done?'#5AADA4':'var(--muted)'}">
-        ${p.emoji} ${p.name} ${done?'✓':'…'}
-      </div>`;
-    }).join('')}
-  </div>`;
+function renderRev(room,players,answers){
+  show('s-rev');
+  const stage=room.stage,qi=room.question_idx;
+  const qs=QUESTIONS[stage]||[],q=qs[qi];
+  document.getElementById('rev-title').textContent=q?.q||'결과';
+  document.getElementById('rev-list').innerHTML=answers.filter(a=>a.stage===stage&&a.question_idx===qi).map(a=>{
+    const p=players.find(pl=>pl.id===a.player_id)||{};
+    const c=charOf(p.char_id);
+    return `<div class="result-row">
+      <span style="font-size:1.5rem">${c.emoji}</span>
+      <span style="font-weight:700;color:${c.color}">${p.name}</span>
+      <span style="flex:1;text-align:right;font-size:.9rem;background:${a.choice==='A'?'#FFB5A7':'#9DD9D2'};color:#fff;padding:3px 10px;border-radius:10px">
+        ${a.choice==='A'?(q?.A||'A'):(q?.B||'B')}
+      </span>
+    </div>`;
+  }).join('');
+  const isLastQ=qi>=(qs.length-1);
+  const isLastStage=stage>=(QUESTIONS.length-1);
+  document.getElementById('btn-next-q').style.display=isHost&&!isLastQ?'block':'none';
+  document.getElementById('btn-next-stage').style.display=isHost&&isLastQ&&!isLastStage?'block':'none';
+  document.getElementById('btn-to-final').style.display=isHost&&isLastQ&&isLastStage?'block':'none';
+  document.getElementById('rev-wait').style.display=isHost?'none':'block';
+}
+async function hostNextQ(){
+  const {data:room}=await sb.from('rooms').select('question_idx').eq('id',roomId).single();
+  await sb.from('rooms').update({status:'question',question_idx:room.question_idx+1}).eq('id',roomId);
+}
+async function hostNextStage(){
+  const {data:room}=await sb.from('rooms').select('stage').eq('id',roomId).single();
+  await sb.from('rooms').update({status:'lobby',stage:room.stage+1,question_idx:0}).eq('id',roomId);
+}
+async function hostToFinal(){
+  await sb.from('rooms').update({status:'final'}).eq('id',roomId);
 }
 
-function renderQ(){
-  const q = curQ();
-  const stage = G.stage;
-  const qi = G.qIdx;
-  const total = totalQ();
-  const allDone = Object.keys(G.answers).length === G.playerCount;
-
-  document.getElementById('q-stage-label').textContent = ['1단계','2단계','3단계'][stage];
-  let dotsH='';
-  for(let i=0;i<total;i++){
-    let cls='s-dot';
-    if(i<qi) cls+=' done';
-    else if(i===qi) cls+=' active';
-    dotsH+=`<div class="${cls}"></div>`;
-  }
-  document.getElementById('q-dots').innerHTML = dotsH;
-  document.getElementById('q-prog').style.width = (qi/total*100)+'%';
-  document.getElementById('q-cat').textContent = CATS_ROTATE[qi % CATS_ROTATE.length];
-  document.getElementById('q-num').textContent = `${QUESTIONS[stage].stageName} • 질문 ${qi+1}/${total}`;
-  document.getElementById('q-text').textContent = q.text;
-
-  const choicesDiv = document.getElementById('q-choices');
-  const actionDiv  = document.getElementById('q-action');
-  const banner     = document.getElementById('q-banner');
-
-  if(allDone){
-    banner.style.display = 'none';
-    choicesDiv.innerHTML = playerStatusBar() +
-      `<div class="tc" style="padding:12px 0"><div style="font-size:30px;margin-bottom:6px">✅</div>
-      <div style="font-weight:700;color:var(--muted)">모두 선택 완료!</div></div>`;
-    actionDiv.innerHTML = `<button class="btn btn-primary" onclick="revealAnswers()">선택 결과 공개! ✨</button>`;
-    return;
-  }
-
-  // 현재 차례 플레이어
-  const player = G.players[G.pTurn];
-  banner.style.display = 'block';
-  document.getElementById('q-p-emoji').textContent = player.emoji;
-  document.getElementById('q-p-name').textContent  = player.name;
-
-  choicesDiv.innerHTML = playerStatusBar() +
-    `<button class="choice-btn" onclick="pickAnswer('a')">
-      <div class="choice-badge badge-a">A</div>
-      <span>${q.a}</span>
-    </button>
-    <button class="choice-btn" onclick="pickAnswer('b')">
-      <div class="choice-badge badge-b">B</div>
-      <span>${q.b}</span>
+function renderFinal(room,players,finals){
+  show('s-final');
+  const myFinal=finals.find(f=>f.player_id===myId);
+  document.getElementById('final-list').innerHTML=players.filter(p=>p.id!==myId).map(p=>{
+    const c=charOf(p.char_id),picked=myFinal?.target_id===p.id;
+    return `<button onclick="submitFinal('${p.id}')" style="width:100%;padding:14px;border:3px solid ${picked?c.color:'#eee'};border-radius:16px;background:${picked?c.bg:'#fff'};cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s${myFinal?';pointer-events:none':''}">
+      <span style="font-size:2rem">${c.emoji}</span>
+      <span style="font-weight:700;color:${c.color};font-size:1rem">${p.name}</span>
+      ${picked?`<span style="margin-left:auto;color:${c.color}">💌</span>`:''}
     </button>`;
-  actionDiv.innerHTML = '';
-}
-
-function pickAnswer(choice){
-  const player = G.players[G.pTurn];
-  const q = curQ();
-
-  G.answers[player.id] = choice;
-  G.players[G.pTurn].choices[G.stage].push({
-    question: q.text, choice, aText: q.a, bText: q.b
-  });
-
-  // 다음 미선택 플레이어 찾기
-  let nextIdx = -1;
-  for(let i=0;i<G.playerCount;i++){
-    if(G.answers[G.players[i].id]===undefined){nextIdx=i;break;}
-  }
-
-  if(nextIdx===-1){
-    G.pTurn = 0;
-  } else {
-    G.pTurn = nextIdx;
-  }
-
-  // 짧은 딜레이 후 바로 다음 화면으로
-  const choicesDiv = document.getElementById('q-choices');
-  const actionDiv  = document.getElementById('q-action');
-  const banner     = document.getElementById('q-banner');
-
-  choicesDiv.innerHTML = playerStatusBar() +
-    `<div class="tc" style="padding:10px 0">
-      <div style="font-size:26px;margin-bottom:6px">✓</div>
-      <div style="font-weight:700;font-size:15px">${player.name}님 선택 완료!</div>
-    </div>`;
-
-  if(nextIdx===-1){
-    banner.style.display = 'none';
-    actionDiv.innerHTML = `<button class="btn btn-primary" onclick="revealAnswers()">선택 결과 공개! ✨</button>`;
-  } else {
-    const nxt = G.players[nextIdx];
-    document.getElementById('q-p-emoji').textContent = nxt.emoji;
-    document.getElementById('q-p-name').textContent  = nxt.name;
-    // 0.6초 후 자동으로 다음 플레이어 화면 전환
-    actionDiv.innerHTML = '';
-    setTimeout(()=>renderQ(), 600);
+  }).join('');
+  document.getElementById('final-status-bar').innerHTML=players.map(p=>{
+    const done=finals.some(f=>f.player_id===p.id);
+    const c=charOf(p.char_id);
+    return `<div class="player-chip" style="background:${done?c.bg:'#f5f5f5'};color:${done?c.color:'#bbb'}">${c.emoji} ${p.name} ${done?'✓':'…'}</div>`;
+  }).join('');
+  document.getElementById('final-wait').style.display=myFinal?'block':'none';
+  if(players.length>0&&players.every(p=>finals.some(f=>f.player_id===p.id))){
+    sb.from('rooms').update({status:'ended'}).eq('id',roomId).eq('status','final').then(()=>{});
   }
 }
-
-// ===================== REVEAL SCREEN =====================
-
-function revealAnswers(){
-  const q = curQ();
-  const gA = G.players.filter(p=>G.answers[p.id]==='a');
-  const gB = G.players.filter(p=>G.answers[p.id]==='b');
-
-  document.getElementById('rv-q-text').textContent = q.text;
-
-  function chips(arr){
-    if(!arr.length) return `<div class="subtitle" style="padding:8px;font-size:12px">없어요</div>`;
-    return arr.map(p=>`<div class="chip" style="border:1.5px solid ${p.color}">${p.emoji} ${p.name}</div>`).join('');
-  }
-
-  document.getElementById('rv-grid').innerHTML = `
-    <div class="rev-col rev-a">
-      <div class="rev-title" style="color:#5AADA4">🟢 A: ${q.a}</div>
-      ${chips(gA)}
-    </div>
-    <div class="rev-col rev-b">
-      <div class="rev-title" style="color:#D0705A">🔴 B: ${q.b}</div>
-      ${chips(gB)}
-    </div>`;
-
-  const isLastQ = G.qIdx >= totalQ()-1;
-  const isLastS = G.stage >= 2;
-  const btn = document.getElementById('rv-next-btn');
-  if(isLastQ && isLastS) btn.textContent = '최종 로비로 →';
-  else if(isLastQ) btn.textContent = '🏰 로비로 가기';
-  else btn.textContent = '다음 질문 →';
-
-  show('s-reveal');
+async function submitFinal(targetId){
+  await sb.from('final_choices').upsert({room_id:roomId,player_id:myId,target_id:targetId},{onConflict:'room_id,player_id'});
 }
 
-function nextQuestion(){
-  const isLastQ = G.qIdx >= totalQ()-1;
-  if(isLastQ){
-    renderLobby();
-    show('s-lobby');
-  } else {
-    G.qIdx++;
-    G.answers = {};
-    G.pTurn = 0;
-    renderQ();
-    show('s-q');
-  }
-}
-
-// ===================== LOBBY SCREEN =====================
-
-function renderLobby(){
-  const stage = G.stage;
-  const isFinal = stage >= 2;
-  const emojis = ['🌱','💕','🌟','🚪'];
-  const titles = ['1단계 로비!','2단계 로비!','최종 로비 🚪'];
-  const subs   = ['나를 알아가기 단계 완료!','연애 & 데이트 단계 완료!','모든 질문이 끝났어요! 이제 최종 선택만 남았어요'];
-
-  document.getElementById('lb-emoji').textContent   = isFinal ? '🚪' : emojis[stage];
-  document.getElementById('lb-title').textContent   = titles[stage];
-  document.getElementById('lb-sub').textContent     = subs[stage];
-
-  document.getElementById('lb-players').innerHTML = G.players.map(p=>`
-    <div class="lp-avatar">
-      <div class="avatar-bubble" style="background:${p.bg}">${p.emoji}</div>
-      <div style="font-size:12px;font-weight:600">${p.name}</div>
-    </div>`).join('');
-
-  const prompts = LOBBY_PROMPTS[stage] || LOBBY_PROMPTS[0];
-  document.getElementById('lb-prompt').textContent = rand(prompts);
-
-  const btn = document.getElementById('lb-next-btn');
-  btn.textContent = isFinal ? '💕 최종 선택으로!' : '다음 단계로 →';
-}
-
-function nextFromLobby(){
-  if(G.stage >= 2){
-    G.finPIdx = 0;
-    G.finalChoices = {};
-    if(!window.finReady) window.finReady = {};
-    renderFinalForPlayer();
-    show('s-final');
-  } else {
-    G.stage++;
-    G.qIdx = 0;
-    G.answers = {};
-    G.pTurn = 0;
-    renderQ();
-    show('s-q');
-  }
-}
-
-// ===================== FINAL SELECTION =====================
-
-function renderFinalForPlayer(){
-  const cur = G.players[G.finPIdx];
-  document.getElementById('fin-emoji').textContent = cur.emoji;
-  document.getElementById('fin-name').textContent  = cur.name;
-
-  const rk = `fin_${cur.id}`;
-  if(!window.finReady) window.finReady = {};
-
-  if(!window.finReady[rk]){
-    document.getElementById('fin-area').innerHTML = `
-      <div class="cover">
-        <div style="font-size:30px;margin-bottom:8px">🤫</div>
-        <div style="font-weight:700;margin-bottom:4px">${cur.name}님에게 기기를 넘겨주세요</div>
-        <div class="subtitle" style="font-size:12px">비밀 선택이에요!</div>
-      </div>`;
-    document.getElementById('fin-action').innerHTML = `
-      <button class="btn btn-mint" onclick="finReady('${rk}')">${cur.emoji} 준비됐어요!</button>`;
-    return;
-  }
-
-  const others = G.players.filter(p=>p.id!==cur.id);
-  const sel = G.finalChoices[cur.id];
-
-  document.getElementById('fin-area').innerHTML = `
-    <div class="subtitle tc mb12" style="font-size:13px;margin-bottom:10px">함께 성을 나가고 싶은 사람을 선택하세요</div>
-    <div class="final-grid">
-      ${others.map(p=>`
-        <div class="fp-card ${sel===p.id?'sel':''}" id="fpc_${p.id}"
-             onclick="pickFinal(${cur.id},${p.id})"
-             style="${sel===p.id?`border-color:${p.color}`:''}">
-          <div style="font-size:36px;margin-bottom:6px">${p.emoji}</div>
-          <div style="font-size:12px;font-weight:700">${p.name}</div>
-        </div>`).join('')}
-    </div>`;
-
-  if(sel!==undefined){
-    const t = G.players.find(p=>p.id===sel);
-    document.getElementById('fin-action').innerHTML = `
-      <div class="tc subtitle mb8" style="margin-bottom:8px;font-size:13px">선택: <strong>${t.emoji} ${t.name}</strong></div>
-      <button class="btn btn-primary" onclick="confirmFinal()">선택 확정 ✓</button>`;
-  } else {
-    document.getElementById('fin-action').innerHTML = '';
-  }
-}
-
-function finReady(key){
-  if(!window.finReady) window.finReady={};
-  window.finReady[key] = true;
-  renderFinalForPlayer();
-}
-
-function pickFinal(pid, tid){
-  G.finalChoices[pid] = tid;
-  renderFinalForPlayer();
-}
-
-function confirmFinal(){
-  const cur = G.players[G.finPIdx];
-  if(G.finalChoices[cur.id]===undefined){alert('선택해주세요!');return;}
-  G.finPIdx++;
-  if(G.finPIdx >= G.playerCount){
-    renderFinalReveal();
-    show('s-freveal');
-  } else {
-    renderFinalForPlayer();
-  }
-}
-
-// ===================== FINAL REVEAL =====================
-
-function renderFinalReveal(){
-  const players = G.players;
-  const ch = G.finalChoices;
-
-  const matched = new Set();
-  const couples = [];
-  for(let i=0;i<players.length;i++){
-    if(matched.has(players[i].id)) continue;
-    for(let j=i+1;j<players.length;j++){
-      if(matched.has(players[j].id)) continue;
-      if(ch[players[i].id]===players[j].id && ch[players[j].id]===players[i].id){
-        couples.push([players[i],players[j]]);
-        matched.add(players[i].id);
-        matched.add(players[j].id);
-      }
-    }
-  }
-  const solos = players.filter(p=>!matched.has(p.id));
-  G.couples = couples;
-  G.solos   = solos;
-
-  document.getElementById('fr-emoji').textContent = couples.length>0 ? '💕' : '🐱';
-
-  let html = `<div class="card mw mb12" style="margin-bottom:14px">
-    <div class="label mb8" style="margin-bottom:10px">💌 모든 선택 공개</div>`;
-
+function renderEnd(players,finals){
+  show('s-end');
+  const matches=[],used=new Set();
   players.forEach(p=>{
-    const t = players.find(pl=>pl.id===ch[p.id]);
-    const isCouple = matched.has(p.id);
-    html += `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F0EAF8">
-      <span style="font-size:22px">${p.emoji}</span>
-      <span style="font-weight:600;flex:1">${p.name}</span>
-      <span style="font-size:16px">→</span>
-      <span style="font-size:22px">${t.emoji}</span>
-      <span style="font-weight:600">${t.name}</span>
-      ${isCouple?'<span style="color:#FFB5A7">💕</span>':''}
-    </div>`;
+    if(used.has(p.id))return;
+    const chosen=finals.find(f=>f.player_id===p.id)?.target_id;
+    if(!chosen)return;
+    const reverse=finals.find(f=>f.player_id===chosen)?.target_id;
+    if(reverse===p.id&&!used.has(chosen)){
+      matches.push([p,players.find(pl=>pl.id===chosen)]);
+      used.add(p.id);used.add(chosen);
+    }
   });
-  html += '</div>';
-
-  if(couples.length){
-    html += `<div style="background:linear-gradient(135deg,rgba(255,181,167,.2),rgba(255,214,231,.25));border-radius:var(--r);padding:20px;margin-bottom:12px;text-align:center">
-      <div style="font-size:26px;font-weight:800;margin-bottom:12px">💕 매칭 성공!</div>`;
-    couples.forEach(([a,b])=>{
-      html += `<div style="display:flex;align-items:center;justify-content:center;gap:18px;margin:10px 0">
-        <div class="tc"><div style="font-size:38px">${a.emoji}</div><div style="font-size:13px;font-weight:700;margin-top:4px">${a.name}</div></div>
-        <div style="font-size:22px;color:#FFB5A7">💕</div>
-        <div class="tc"><div style="font-size:38px">${b.emoji}</div><div style="font-size:13px;font-weight:700;margin-top:4px">${b.name}</div></div>
+  let html='';
+  if(matches.length===0){
+    html=`<div class="card" style="text-align:center;margin-bottom:16px"><div style="font-size:3rem">🐱</div><p style="margin-top:12px;color:#aaa">이번엔 아무도 매칭되지 않았어요.<br>다음엔 꼭 연결되길! 🍀</p></div>`;
+  } else {
+    html=matches.map(([a,b])=>{
+      const ca=charOf(a.char_id),cb=charOf(b.char_id);
+      return `<div class="card" style="text-align:center;margin-bottom:12px">
+        <div class="match-badge" style="margin-bottom:10px">💘 MATCH!</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px">
+          <div><div style="font-size:2.5rem">${ca.emoji}</div><div style="font-weight:700;color:${ca.color}">${a.name}</div></div>
+          <div style="font-size:1.5rem">❤️</div>
+          <div><div style="font-size:2.5rem">${cb.emoji}</div><div style="font-weight:700;color:${cb.color}">${b.name}</div></div>
+        </div>
       </div>`;
-    });
-    html += '</div>';
+    }).join('');
   }
-
-  if(solos.length){
-    html += `<div style="background:linear-gradient(135deg,rgba(157,217,210,.2),rgba(184,228,249,.2));border-radius:var(--r);padding:20px;text-align:center">
-      <div style="font-size:26px;font-weight:800;margin-bottom:10px">🐱 솔로 클럽</div>
-      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-        ${solos.map(p=>`<div class="chip" style="border:1.5px solid ${p.color}">${p.emoji} ${p.name}</div>`).join('')}
-      </div>
-      <div class="subtitle" style="font-size:13px">${rand(CAT_QUOTES)}</div>
-    </div>`;
-  }
-
-  document.getElementById('fr-content').innerHTML = html;
-}
-
-// ===================== ENDING SCREEN =====================
-
-function goEnding(){
-  const {couples, solos} = G;
-  let cHtml = '';
-  couples.forEach(([a,b])=>{
-    cHtml += `<div class="couple-card">
-      <div style="font-size:17px;font-weight:800;margin-bottom:12px">🚪 문 1 — 함께 나가요!</div>
-      <div class="couple-display">
-        <div class="tc"><div style="font-size:46px">${a.emoji}</div><div style="font-size:13px;font-weight:700;margin-top:5px">${a.name}</div></div>
-        <div style="font-size:26px;color:#FFB5A7">💕</div>
-        <div class="tc"><div style="font-size:46px">${b.emoji}</div><div style="font-size:13px;font-weight:700;margin-top:5px">${b.name}</div></div>
-      </div>
-      <div class="subtitle" style="font-size:13px">두 분이 함께 성을 떠나요 ✨</div>
-    </div>`;
+  html+=`<div class="card"><div class="section-label" style="margin-bottom:10px">모두의 선택</div>`;
+  players.forEach(p=>{
+    const c=charOf(p.char_id);
+    const chosen=finals.find(f=>f.player_id===p.id)?.target_id;
+    const target=players.find(pl=>pl.id===chosen);
+    const ct=charOf(target?.char_id);
+    html+=`<div class="result-row"><span style="font-size:1.4rem">${c.emoji}</span><span style="font-weight:700;color:${c.color}">${p.name}</span><span style="margin-left:auto">→</span><span style="font-size:1.4rem">${target?ct.emoji:'❓'}</span><span style="font-weight:600;color:${ct.color}">${target?.name||'?'}</span></div>`;
   });
-  document.getElementById('end-couples').innerHTML = cHtml;
-
-  let sHtml = '';
-  if(solos.length){
-    sHtml = `<div class="solo-card">
-      <div style="font-size:17px;font-weight:800;margin-bottom:12px">🐱 문 2 — 고양이들과 함께!</div>
-      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin-bottom:16px">
-        ${solos.map(p=>`<div class="tc"><div style="font-size:38px">${p.emoji}</div><div style="font-size:12px;font-weight:700;margin-top:4px">${p.name}</div></div>`).join('')}
-      </div>
-      <div class="cat-row">${CATS.join('')}</div>
-      <div class="subtitle mt8" style="font-size:14px;margin-top:8px">${rand(CAT_QUOTES)}</div>
-    </div>`;
-  }
-  document.getElementById('end-solos').innerHTML = sHtml;
-  show('s-ending');
-}
-
-// ===================== HISTORY =====================
-
-function toggleHistory(){
-  histOpen = !histOpen;
-  const wrap = document.getElementById('hist-wrap');
-  wrap.style.display = histOpen ? 'block' : 'none';
-  document.querySelector('#s-ending .btn-outline').textContent =
-    histOpen ? '📋 히스토리 닫기' : '📋 선택 히스토리 보기';
-  if(histOpen) renderHistory();
-}
-
-function renderHistory(){
-  let html = '';
-  G.players.forEach(p=>{
-    html += `<div style="background:#fff;border-radius:var(--r-sm);padding:16px;margin-bottom:12px;box-shadow:var(--shadow-sm)">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <span style="font-size:22px">${p.emoji}</span>
-        <span style="font-weight:700">${p.name}</span>
-      </div>`;
-    QUESTIONS.forEach((stage,si)=>{
-      const stageChoices = p.choices[si];
-      if(stageChoices && stageChoices.length){
-        html += `<div class="label mb8" style="margin-bottom:6px">${stage.stageName}</div>`;
-        stageChoices.forEach(c=>{
-          const txt = c.choice==='a' ? c.aText : c.bText;
-          html += `<div class="hist-item">
-            <div class="subtitle" style="font-size:12px;margin-bottom:3px">${c.question}</div>
-            <div style="font-weight:600;color:${c.choice==='a'?'#5AADA4':'#D0705A'}">${c.choice.toUpperCase()} — ${txt}</div>
-          </div>`;
-        });
-        html += '<div style="height:8px"></div>';
-      }
-    });
-    const tgt = G.players.find(pl=>pl.id===G.finalChoices[p.id]);
-    if(tgt) html += `<div style="padding:8px;background:rgba(255,181,167,.15);border-radius:8px;font-size:13px;font-weight:600">💕 최종 선택: ${tgt.emoji} ${tgt.name}</div>`;
-    html += '</div>';
-  });
-  document.getElementById('hist-wrap').innerHTML = html;
-}
-
-// ===================== RESTART =====================
-
-function restartGame(){
-  chosenCount = 0;
-  setupSel = {};
-  histOpen = false;
-  window.finReady = {};
-  document.querySelectorAll('.count-btn').forEach(b=>b.classList.remove('sel'));
-  const sb = document.getElementById('startBtn');
-  sb.style.opacity = '.45';
-  sb.style.pointerEvents = 'none';
-  document.getElementById('hist-wrap').style.display = 'none';
-  show('s-start');
+  html+='</div>';
+  document.getElementById('end-content').innerHTML=html;
 }
 </script>
 </body>
