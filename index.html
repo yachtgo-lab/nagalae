@@ -9,208 +9,336 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'Apple SD Gothic Neo',Pretendard,'Noto Sans KR',sans-serif;background:#FFF8E7;min-height:100vh;display:flex;align-items:center;justify-content:center}
 #app{width:100%;max-width:420px;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
-.screen{width:100%;display:none;flex-direction:column;align-items:center;gap:16px}
+.screen{width:100%;display:none;flex-direction:column;align-items:center;gap:14px}
 .screen.active{display:flex}
-h1{font-size:2rem;font-weight:900;color:#7B5EA7;text-align:center;line-height:1.2}
-h2{font-size:1.3rem;font-weight:800;color:#7B5EA7;text-align:center}
-p{font-size:.95rem;color:#555;text-align:center;line-height:1.6}
-input{width:100%;padding:14px 16px;border:2px solid #C8B6E2;border-radius:16px;font-size:1rem;background:#fff;outline:none;color:#333;text-align:center}
+h1{font-size:1.9rem;font-weight:900;color:#7B5EA7;text-align:center;line-height:1.2}
+h2{font-size:1.2rem;font-weight:800;color:#7B5EA7;text-align:center}
+p{font-size:.9rem;color:#555;text-align:center;line-height:1.6}
+input{width:100%;padding:13px 16px;border:2px solid #C8B6E2;border-radius:16px;font-size:1rem;background:#fff;outline:none;color:#333;text-align:center}
 input:focus{border-color:#7B5EA7}
-.btn{width:100%;padding:14px;border:none;border-radius:20px;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .1s,opacity .1s}
+.btn{width:100%;padding:14px;border:none;border-radius:20px;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .1s}
 .btn:active{transform:scale(.97)}
 .btn-pri{background:linear-gradient(135deg,#C8B6E2,#9DD9D2);color:#fff}
 .btn-sec{background:#fff;border:2px solid #C8B6E2;color:#7B5EA7}
 .btn-rose{background:linear-gradient(135deg,#FFB5A7,#ff9a88);color:#fff}
+.btn-gold{background:linear-gradient(135deg,#FFD97D,#FFB347);color:#5a3800}
 .btn:disabled{opacity:.4;pointer-events:none}
-.card{background:#fff;border-radius:24px;padding:20px;width:100%;box-shadow:0 4px 20px rgba(200,182,226,.3)}
-.code-display{font-size:2.5rem;font-weight:900;letter-spacing:.15em;color:#7B5EA7;text-align:center;font-family:monospace}
-.player-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.85rem;font-weight:600}
-.status-bar{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;width:100%}
-.choice-btn{width:100%;padding:18px;border:3px solid transparent;border-radius:20px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .15s;background:#fff;color:#333}
-.choice-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1)}
-.choice-btn.A{border-color:#FFB5A7}
-.choice-btn.A:hover:not(:disabled){background:#FFB5A7;color:#fff}
-.choice-btn.B{border-color:#9DD9D2}
-.choice-btn.B:hover:not(:disabled){background:#9DD9D2;color:#fff}
-.choice-btn.selected{opacity:.5;pointer-events:none}
-.choice-btn.picked-A{background:#FFB5A7;color:#fff;border-color:#FFB5A7}
-.choice-btn.picked-B{background:#9DD9D2;color:#fff;border-color:#9DD9D2}
-.waiting-msg{font-size:.9rem;color:#aaa;text-align:center;animation:pulse 1.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
-.char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
-.char-card{padding:12px 6px;border-radius:16px;border:3px solid transparent;text-align:center;cursor:pointer;transition:all .15s;background:#fff}
-.char-card:hover:not(.taken){transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
-.char-card.selected-me{border-color:#7B5EA7;background:#EEE8FA}
-.char-card.taken{opacity:.35;pointer-events:none}
-.char-emoji{font-size:2rem}
-.char-name{font-size:.75rem;font-weight:700;margin-top:4px;color:#555}
-.result-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:#f9f5ff;margin-bottom:8px}
-.match-badge{background:linear-gradient(135deg,#FFB5A7,#C8B6E2);color:#fff;padding:4px 10px;border-radius:10px;font-size:.8rem;font-weight:700}
-.divider{height:1px;background:#eee;width:100%;margin:4px 0}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 22px;border-radius:20px;font-size:.9rem;font-weight:600;z-index:999;pointer-events:none;animation:fadeup .3s ease}
-@keyframes fadeup{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-.q-counter{font-size:.8rem;color:#aaa;text-align:center}
-.lobby-icon{font-size:3rem;text-align:center}
-.section-label{font-size:.75rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.08em;width:100%;text-align:left}
+.card{background:#fff;border-radius:22px;padding:18px;width:100%;box-shadow:0 4px 18px rgba(200,182,226,.28)}
+.code-display{font-size:2.4rem;font-weight:900;letter-spacing:.15em;color:#7B5EA7;text-align:center;font-family:monospace}
+.divider{height:1px;background:#eee;width:100%}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:.8rem;font-weight:600}
+.sbar{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;width:100%}
+.cbtn{width:100%;padding:16px;border:3px solid transparent;border-radius:18px;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .15s;background:#fff;color:#333;text-align:left;line-height:1.4}
+.cbtn:active{transform:scale(.98)}
+.cbtn.A{border-color:#FFB5A7}.cbtn.A:active{background:#FFB5A7;color:#fff}
+.cbtn.B{border-color:#9DD9D2}.cbtn.B:active{background:#9DD9D2;color:#fff}
+.cbtn.pA{background:#FFB5A7;color:#fff;border-color:#FFB5A7;pointer-events:none}
+.cbtn.pB{background:#9DD9D2;color:#fff;border-color:#9DD9D2;pointer-events:none}
+.av-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%}
+.av-card{padding:8px 4px;border-radius:14px;border:3px solid transparent;text-align:center;cursor:pointer;transition:all .15s;background:#f9f9f9}
+.av-card:hover:not(.tk){background:#F3EEFF}
+.av-card.me{border-color:#7B5EA7;background:#EEE8FA}
+.av-card.tk{opacity:.32;pointer-events:none}
+.av-name{font-size:.6rem;font-weight:700;color:#666;margin-top:3px}
+.cat-wrap{display:flex;align-items:flex-start;gap:10px;background:#F3EEFF;border-radius:20px;padding:14px;width:100%}
+.cat-ico{font-size:2.2rem;flex-shrink:0}
+.cat-bbl{background:#fff;border-radius:0 16px 16px 16px;padding:12px;font-size:.95rem;font-weight:700;color:#333;line-height:1.5;flex:1;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.cat-lbl{font-size:.7rem;color:#9DD9D2;font-weight:700;margin-bottom:4px}
+.wmsg{font-size:.85rem;color:#bbb;text-align:center;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.qcnt{font-size:.78rem;color:#aaa;text-align:center}
+.intro-card{background:linear-gradient(160deg,#1a1035 0%,#2d1b69 60%,#1a1035 100%);border-radius:26px;padding:26px;width:100%;text-align:center;color:#fff;position:relative;overflow:hidden}
+.intro-card::before{content:'✦';position:absolute;font-size:8rem;opacity:.05;top:-20px;left:50%;transform:translateX(-50%)}
+.starbg span{position:absolute;background:#fff;border-radius:50%;animation:twk 2s infinite}
+@keyframes twk{0%,100%{opacity:.2}50%{opacity:.9}}
+.lobby-box{width:100%;background:linear-gradient(160deg,#F3EEFF,#EEF4FF);border-radius:22px;padding:20px;text-align:center;border:2px solid #C8B6E2}
+.path-wrap{width:100%}
+.path-row{display:flex;align-items:center;gap:8px;padding:6px 0}
+.path-dot{width:38px;height:38px;border-radius:50%;background:#f0ecf8;border:3px solid #C8B6E2;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#7B5EA7;flex-shrink:0;transition:all .4s ease;opacity:0;transform:scale(.5)}
+.path-dot.show{opacity:1;transform:scale(1)}
+.path-dot.cA{background:#FFB5A7;border-color:#FFB5A7;color:#fff}
+.path-dot.cB{background:#9DD9D2;border-color:#9DD9D2;color:#fff}
+.path-line{width:3px;height:22px;background:#eee;margin-left:17px}
+.path-ans{font-size:.75rem;color:#888;flex:1;line-height:1.3;opacity:0;transition:opacity .4s .2s}
+.path-ans.show{opacity:1}
+.rrow{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:#f9f5ff;margin-bottom:7px}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:9px 20px;border-radius:20px;font-size:.88rem;font-weight:600;z-index:999;pointer-events:none;animation:fup .3s ease}
+@keyframes fup{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.slbl{font-size:.72rem;font-weight:700;color:#aaa;letter-spacing:.07em;width:100%;text-align:left}
+.catend{text-align:center}
+.bigcat{font-size:5rem;display:block;animation:cbnc 1s ease-in-out infinite}
+@keyframes cbnc{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.prog{display:flex;justify-content:center;gap:6px;width:100%}
+.prog-dot{width:10px;height:10px;border-radius:50%;background:#eee;transition:background .3s}
+.prog-dot.on{background:#C8B6E2}
+.prog-dot.done{background:#9DD9D2}
+.matchcard{background:linear-gradient(135deg,#FFF0ED,#F3EEFF);border-radius:22px;padding:20px;text-align:center;border:2px solid #C8B6E2;width:100%}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- 랜딩 -->
-  <div id="s-land" class="screen active">
-    <div style="font-size:3.5rem;text-align:center">👸</div>
-    <h1>나랑 나갈래?</h1>
-    <p style="color:#aaa;font-size:.85rem">함께 플레이할 친구들과<br>각자 폰으로 접속하세요</p>
-    <div class="card" style="gap:12px;display:flex;flex-direction:column">
-      <input id="inp-name" placeholder="내 이름을 입력해요" maxlength="8">
-      <button class="btn btn-pri" onclick="doCreate()">방 만들기 👑</button>
-      <div style="display:flex;align-items:center;gap:8px"><div class="divider"></div><span style="color:#ccc;font-size:.8rem;white-space:nowrap">또는</span><div class="divider"></div></div>
-      <input id="inp-code" placeholder="초대 코드 6자리" maxlength="6" style="text-transform:uppercase;letter-spacing:.15em" oninput="this.value=this.value.toUpperCase()">
-      <button class="btn btn-sec" onclick="doJoin()">입장하기 🚪</button>
+<!-- 인트로 -->
+<div id="s-intro" class="screen active">
+  <div class="intro-card">
+    <div style="font-size:.65rem;letter-spacing:.25em;color:#C8B6E2;margin-bottom:10px">✦ ONCE UPON A TIME ✦</div>
+    <div style="font-size:3rem;margin-bottom:6px">🏰</div>
+    <h1 style="color:#fff;font-size:1.7rem;margin-bottom:16px">나랑 나갈래?</h1>
+    <div style="background:rgba(255,255,255,.1);border-radius:16px;padding:16px;text-align:left;border:1px solid rgba(255,255,255,.15);margin-bottom:18px">
+      <p style="color:#EEE8FA;font-size:.88rem;line-height:1.85;word-break:keep-all">
+        🌙 마법에 걸린 성에 갇힌 공주들…<br>
+        탈출구는 단 두 개의 문!<br><br>
+        💌 <b style="color:#FFB5A7">하트 문</b> — 함께 나갈 운명을 찾은 공주<br>
+        🐱 <b style="color:#9DD9D2">고양이 문</b> — 혼자서도 당당한 공주<br><br>
+        세 개의 관문을 통과하고<br>마지막 선택으로 운명을 결정해요!
+      </p>
+    </div>
+    <button class="btn btn-gold" onclick="show('s-land')">모험 시작하기 ✨</button>
+  </div>
+</div>
+
+<!-- 랜딩 -->
+<div id="s-land" class="screen">
+  <div style="font-size:2.8rem;text-align:center">👸</div>
+  <h1>나랑 나갈래?</h1>
+  <div class="card" style="display:flex;flex-direction:column;gap:11px">
+    <input id="inp-name" placeholder="공주의 이름을 입력해요" maxlength="8">
+    <button class="btn btn-pri" onclick="doCreate()">방 만들기 👑</button>
+    <div style="display:flex;align-items:center;gap:8px"><div class="divider"></div><span style="color:#ccc;font-size:.78rem;white-space:nowrap">또는</span><div class="divider"></div></div>
+    <input id="inp-code" placeholder="초대 코드 6자리" maxlength="6" style="text-transform:uppercase;letter-spacing:.18em" oninput="this.value=this.value.toUpperCase()">
+    <button class="btn btn-sec" onclick="doJoin()">성에 입장하기 🚪</button>
+  </div>
+</div>
+
+<!-- 대기실 -->
+<div id="s-wait" class="screen">
+  <h2>대기실 🏰</h2>
+  <div class="card" style="text-align:center">
+    <div style="font-size:.78rem;color:#aaa;margin-bottom:4px">초대 코드</div>
+    <div class="code-display" id="room-code">------</div>
+    <div style="font-size:.72rem;color:#bbb;margin-top:3px">친구에게 코드를 알려주세요</div>
+  </div>
+  <div class="card">
+    <div class="slbl" style="margin-bottom:8px">참가자 <span id="player-count">0</span>명</div>
+    <div id="player-list" class="sbar"></div>
+  </div>
+  <div class="card">
+    <div class="slbl" style="margin-bottom:8px">공주 선택 👸</div>
+    <div class="av-grid" id="av-grid"></div>
+  </div>
+  <button id="btn-start" class="btn btn-pri" onclick="hostStart()" style="display:none">게임 시작 🎮</button>
+  <p class="wmsg" id="wait-msg">호스트가 게임을 시작하면 시작돼요</p>
+</div>
+
+<!-- 질문 -->
+<div id="s-q" class="screen">
+  <div class="prog" id="q-prog"></div>
+  <div class="qcnt" id="q-cnt"></div>
+  <div class="cat-wrap">
+    <div class="cat-ico">🐱</div>
+    <div class="cat-bbl">
+      <div class="cat-lbl">냥~ 질문할게요!</div>
+      <div id="q-text"></div>
     </div>
   </div>
+  <div class="sbar" id="q-sbar"></div>
+  <div style="width:100%;display:flex;flex-direction:column;gap:10px">
+    <button id="btn-A" class="cbtn A" onclick="submitAnswer('A')"></button>
+    <button id="btn-B" class="cbtn B" onclick="submitAnswer('B')"></button>
+  </div>
+  <p class="wmsg" id="q-wait" style="display:none">🐱 다른 공주들을 기다리는 중냥…</p>
+</div>
 
-  <!-- 대기실 -->
-  <div id="s-wait" class="screen">
-    <h2>대기실</h2>
-    <div class="card" style="text-align:center">
-      <div style="font-size:.8rem;color:#aaa;margin-bottom:4px">초대 코드</div>
-      <div class="code-display" id="room-code">------</div>
-      <div style="font-size:.75rem;color:#bbb;margin-top:4px">친구에게 코드를 알려주세요</div>
+<!-- 결과 (질문별) -->
+<div id="s-rev" class="screen">
+  <div class="prog" id="rev-prog"></div>
+  <h2 id="rev-title" style="font-size:1rem;word-break:keep-all"></h2>
+  <div id="rev-list" style="width:100%"></div>
+  <button id="btn-nq" class="btn btn-sec" onclick="hostNextQ()" style="display:none">다음 질문 ▶</button>
+  <button id="btn-ns" class="btn btn-pri" onclick="hostNextStage()" style="display:none">로비로 이동 🏃</button>
+  <button id="btn-fin" class="btn btn-rose" onclick="hostToFinal()" style="display:none">최종 선택으로 💌</button>
+  <p class="wmsg" id="rev-wait" style="display:none">호스트가 진행합니다…</p>
+</div>
+
+<!-- 로비 -->
+<div id="s-lobby" class="screen">
+  <div class="lobby-box">
+    <div id="lb-badge" style="font-size:.72rem;font-weight:700;color:#C8B6E2;letter-spacing:.1em;margin-bottom:6px"></div>
+    <div id="lb-icon" style="font-size:2.6rem;margin-bottom:6px">✨</div>
+    <h2 id="lb-title" style="margin-bottom:6px"></h2>
+    <p id="lb-msg" style="white-space:pre-line;font-size:.88rem;color:#777"></p>
+  </div>
+  <div id="path-section" style="width:100%;display:none">
+    <div class="slbl" style="margin-bottom:6px">🗺️ 내가 선택한 경로</div>
+    <div id="path-track" class="path-wrap"></div>
+  </div>
+  <button id="btn-lgo" class="btn btn-pri" onclick="hostStartStage()" style="display:none">다음 관문으로! 🎯</button>
+  <p class="wmsg" id="lb-wait">호스트가 진행합니다…</p>
+</div>
+
+<!-- 최종 선택 -->
+<div id="s-final" class="screen">
+  <div class="cat-wrap">
+    <div class="cat-ico">🐱</div>
+    <div class="cat-bbl">
+      <div class="cat-lbl">냥~ 마지막 선택!</div>
+      함께 성을 탈출하고 싶은 공주를<br>딱 한 명 선택하세요 💌
     </div>
-    <div class="card">
-      <div class="section-label" style="margin-bottom:10px">참가자 <span id="player-count">0</span>명</div>
-      <div id="player-list" class="status-bar"></div>
-    </div>
-    <div class="card">
-      <div class="section-label" style="margin-bottom:10px">캐릭터 선택</div>
-      <div class="char-grid" id="char-grid"></div>
-    </div>
-    <button id="btn-start" class="btn btn-pri" onclick="hostStart()" style="display:none">게임 시작 🎮</button>
-    <p class="waiting-msg" id="wait-msg">호스트가 게임을 시작하면 시작돼요</p>
   </div>
+  <div id="final-list" style="width:100%;display:flex;flex-direction:column;gap:10px"></div>
+  <div class="sbar" id="final-sbar" style="margin-top:6px"></div>
+  <p class="wmsg" id="final-wait" style="display:none">모두 선택할 때까지 기다려요…</p>
+</div>
 
-  <!-- 질문 -->
-  <div id="s-q" class="screen">
-    <div class="card" style="gap:10px;display:flex;flex-direction:column;align-items:center">
-      <div class="q-counter" id="q-counter"></div>
-      <h2 id="q-text" style="font-size:1.1rem;word-break:keep-all"></h2>
-    </div>
-    <div class="status-bar" id="q-status-bar"></div>
-    <div style="width:100%;display:flex;flex-direction:column;gap:10px">
-      <button id="btn-A" class="choice-btn A" onclick="submitAnswer('A')"></button>
-      <button id="btn-B" class="choice-btn B" onclick="submitAnswer('B')"></button>
-    </div>
-    <p class="waiting-msg" id="q-wait" style="display:none">다른 플레이어를 기다리는 중…</p>
-  </div>
-
-  <!-- 결과 (단계) -->
-  <div id="s-rev" class="screen">
-    <h2 id="rev-title"></h2>
-    <div id="rev-list" style="width:100%"></div>
-    <button id="btn-next-q" class="btn btn-sec" onclick="hostNextQ()" style="display:none">다음 질문 ▶</button>
-    <button id="btn-next-stage" class="btn btn-pri" onclick="hostNextStage()" style="display:none">다음 라운드 🌸</button>
-    <button id="btn-to-final" class="btn btn-rose" onclick="hostToFinal()" style="display:none">최종 선택으로 💌</button>
-    <p class="waiting-msg" id="rev-wait">호스트가 진행합니다…</p>
-  </div>
-
-  <!-- 로비 (스테이지 간) -->
-  <div id="s-lobby" class="screen">
-    <div class="lobby-icon" id="lobby-icon">✨</div>
-    <h2 id="lobby-title"></h2>
-    <p id="lobby-msg" style="word-break:keep-all;white-space:pre-line"></p>
-    <button id="btn-lobby-go" class="btn btn-pri" onclick="hostStartStage()" style="display:none">시작! 🎯</button>
-    <p class="waiting-msg" id="lobby-wait">호스트가 시작하면 시작돼요</p>
-  </div>
-
-  <!-- 최종 선택 -->
-  <div id="s-final" class="screen">
-    <h2>최종 선택 💌</h2>
-    <p style="word-break:keep-all">함께 나가고 싶은 사람을<br>한 명 선택해요!</p>
-    <div id="final-list" style="width:100%;display:flex;flex-direction:column;gap:10px"></div>
-    <div class="status-bar" id="final-status-bar" style="margin-top:8px"></div>
-    <p class="waiting-msg" id="final-wait" style="display:none">모두 선택할 때까지 기다려요…</p>
-  </div>
-
-  <!-- 최종 결과 -->
-  <div id="s-end" class="screen">
-    <h2>💘 결과 발표</h2>
-    <div id="end-content" style="width:100%"></div>
-    <button class="btn btn-sec" onclick="location.reload()">다시 하기 🔄</button>
-  </div>
+<!-- 결과 -->
+<div id="s-end" class="screen">
+  <h2>🔮 운명의 문</h2>
+  <div id="end-content" style="width:100%"></div>
+  <button class="btn btn-sec" onclick="location.reload()">다시 모험하기 🔄</button>
+</div>
 
 </div>
 <script>
-const SUPABASE_URL = 'https://gdbycodzgooqacukxwjl.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkYnljb2R6Z29vcWFjdWt4d2psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMDA5OTYsImV4cCI6MjA5Nzg3Njk5Nn0.pyxwi2cMK1tfEEdRi5jJ1mqUCKKhpJh1XPsM3Z5MeHc';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SB_URL='https://gdbycodzgooqacukxwjl.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkYnljb2R6Z29vcWFjdWt4d2psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMDA5OTYsImV4cCI6MjA5Nzg3Njk5Nn0.pyxwi2cMK1tfEEdRi5jJ1mqUCKKhpJh1XPsM3Z5MeHc';
+const sb=supabase.createClient(SB_URL,SB_KEY);
 
-const CHARS = [
-  {id:0,name:'로즈',emoji:'🌹',color:'#FFB5A7',bg:'#FFF0ED'},
-  {id:1,name:'민트',emoji:'🌿',color:'#9DD9D2',bg:'#EDFAF8'},
-  {id:2,name:'라벤더',emoji:'💜',color:'#C8B6E2',bg:'#F3EEFF'},
-  {id:3,name:'선샤인',emoji:'☀️',color:'#FFD97D',bg:'#FFFAED'},
-  {id:4,name:'오션',emoji:'🌊',color:'#80B4FF',bg:'#EEF4FF'},
-  {id:5,name:'체리',emoji:'🍒',color:'#FF8FAB',bg:'#FFF0F3'},
+// ─── Princess SVG ───────────────────────────────────────────────
+function pSVG(style,hc){
+  const sk='#FDDBB4';
+  const base=`
+    <circle cx="30" cy="35" r="15" fill="${sk}"/>
+    <circle cx="24" cy="34" r="2.1" fill="#333"/>
+    <circle cx="36" cy="34" r="2.1" fill="#333"/>
+    <circle cx="24.8" cy="33.3" r=".75" fill="#fff"/>
+    <circle cx="36.8" cy="33.3" r=".75" fill="#fff"/>
+    <ellipse cx="21" cy="38" rx="3.2" ry="1.6" fill="#FFB5A7" opacity=".5"/>
+    <ellipse cx="39" cy="38" rx="3.2" ry="1.6" fill="#FFB5A7" opacity=".5"/>
+    <path d="M25 41 Q30 44.5 35 41" stroke="#FF8FAB" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M17 24 L20 17 L24 22 L30 15 L36 22 L40 17 L43 24Z" fill="#FFD700" stroke="#FFA500" stroke-width=".4"/>`;
+  const hairs=[
+    `<ellipse cx="30" cy="22" rx="16" ry="13" fill="${hc}"/><rect x="14" y="22" width="32" height="8" rx="4" fill="${hc}"/>`,
+    `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 L44,41 Q36,48 30,48 Q24,48 16,41Z" fill="${hc}"/>`,
+    `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 L47,62 Q38,68 30,68 Q22,68 13,62Z" fill="${hc}"/>`,
+    `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 C48,44 50,52 44,58 C40,62 34,59 30,63 C26,67 20,63 16,59 C10,53 12,44 14,31Z" fill="${hc}"/>`,
+    `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 L44,27 Q38,15 30,15 Q22,15 16,27Z" fill="${hc}"/><path d="M44,20 Q53,16 51,30 Q49,38 44,34 Q47,26 44,20Z" fill="${hc}"/>`,
+    `<path d="M17,31 Q17,11 30,11 Q43,11 43,31 L41,25 Q35,13 30,13 Q25,13 19,25Z" fill="${hc}"/><ellipse cx="9" cy="38" rx="5.5" ry="14" fill="${hc}" transform="rotate(-8,9,38)"/><ellipse cx="51" cy="38" rx="5.5" ry="14" fill="${hc}" transform="rotate(8,51,38)"/>`,
+    `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 L44,41 Q36,48 30,48 Q24,48 16,41Z" fill="${hc}"/><ellipse cx="30" cy="12" rx="10" ry="7" fill="${hc}"/><ellipse cx="30" cy="7" rx="6" ry="5" fill="${hc}"/>`,
+    `<ellipse cx="30" cy="17" rx="20" ry="15" fill="${hc}"/><circle cx="11" cy="27" r="8.5" fill="${hc}"/><circle cx="49" cy="27" r="8.5" fill="${hc}"/><circle cx="13" cy="42" r="6" fill="${hc}"/><circle cx="47" cy="42" r="6" fill="${hc}"/>`,
+    `<path d="M14,33 Q14,10 30,10 Q46,10 46,33 L44,27 Q38,16 30,16 Q22,16 16,27Z" fill="${hc}"/><ellipse cx="30" cy="10" rx="12" ry="9" fill="${hc}"/><ellipse cx="30" cy="4" rx="7" ry="6" fill="${hc}"/><circle cx="23" cy="8" r="3.5" fill="${hc}"/><circle cx="37" cy="8" r="3.5" fill="${hc}"/>`,
+    `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 L47,62 Q38,68 30,68 Q22,68 13,62Z" fill="${hc}"/><path d="M15,28 Q20,18 30,18 Q40,18 45,28 L43,23 Q36,15 30,15 Q24,15 17,23Z" fill="${hc}"/>`,
+  ];
+  return `<svg viewBox="0 0 60 72" width="42" height="42" xmlns="http://www.w3.org/2000/svg">${hairs[style%hairs.length]||hairs[0]}${base}</svg>`;
+}
+
+const AVATARS=[
+  {id:0,name:'숏컷',s:0,hc:'#3D2B1F'},
+  {id:1,name:'단발',s:1,hc:'#8B4513'},
+  {id:2,name:'긴직모',s:2,hc:'#1C1C1C'},
+  {id:3,name:'웨이브',s:3,hc:'#8B0000'},
+  {id:4,name:'포니테일',s:4,hc:'#4B0082'},
+  {id:5,name:'양갈래',s:5,hc:'#A0522D'},
+  {id:6,name:'반묶음',s:6,hc:'#000080'},
+  {id:7,name:'곱슬',s:7,hc:'#2E8B57'},
+  {id:8,name:'올림머리',s:8,hc:'#8B008B'},
+  {id:9,name:'앞머리',s:9,hc:'#2F4F4F'},
+];
+function avOf(id){return AVATARS.find(a=>a.id===id)||AVATARS[0];}
+function avSVG(id){const a=avOf(id);return pSVG(a.s,a.hc);}
+
+// ─── Questions ────────────────────────────────────────────────────
+const Q_POOL=[
+  {p:0,q:'선호하는 연애방식은?',A:'내가 리드하는 연애',B:'상대방 리드에 따라가는 연애'},
+  {p:0,q:'나에게 더 어울리는 키워드는?',A:'다정한',B:'이성적인 or 카리스마'},
+  {p:0,q:'당신이 더 중요하게 생각하는 건?',A:'현재',B:'미래'},
+  {p:0,q:'더 추구하는 삶은?',A:'성장하는 삶',B:'평온한 삶'},
+  {p:0,q:'에너지를 충전하는 방식은?',A:'혼자 쉬는 시간 가지기',B:'사람들 만나기'},
+  {p:0,q:'나에게 더 어울리는 키워드는?',A:'자유로운',B:'체계적인'},
+  {p:0,q:'더 좋아하는 대화 방식은?',A:'재미있고 유쾌한 대화',B:'진지하고 깊은 대화'},
+  {p:0,q:'당신의 스타일은?',A:'트렌드를 빠르게 캐치',B:'나만의 스타일 고수'},
+  {p:0,q:'커밍아웃한 친구는?',A:'5명 미만',B:'5명 이상'},
+  {p:1,q:'더 선호하는 연애 상대는?',A:'나와 비슷한 사람',B:'나와 다른 사람'},
+  {p:1,q:'연인과 상상하는 미래는?',A:'하나의 가족이 되는 것',B:'각자의 삶을 가진 동반자'},
+  {p:1,q:'연인에게 바라는 연락패턴은?',A:'일상 모든 것을 공유',B:'하루 끝나고 얘기해도 OK'},
+  {p:1,q:'더 좋아하는 데이트는?',A:'멋진 뷰의 호캉스',B:'자연을 느끼는 캠핑'},
+  {p:1,q:'함께 밥을 먹는다면?',A:'맛있는 요리 만들어먹기',B:'유명한 맛집 찾아가기'},
+  {p:1,q:'연인과의 데이트 빈도는?',A:'시간 날 때마다 보고싶어',B:'휴일에 함께하는 게 좋아'},
+  {p:1,q:'선물을 받는다면?',A:'깜짝 선물',B:'손편지'},
+  {p:1,q:'말없이 불쑥 찾아오는 연인?',A:'서프라이즈! 감동적이야',B:'미리 얘기해줬으면 좋겠어'},
+  {p:1,q:'연애할 때 더 중요한 것은?',A:'비슷한 입맛',B:'유머코드'},
+  {p:1,q:'자기 전 연락은?',A:'통화',B:'문자'},
+  {p:1,q:'애인과 다퉜을 때?',A:'지금 당장 얘기하고 싶어',B:'감정 정리 후 얘기하고 싶어'},
+  {p:1,q:'사랑을 표현하는 방식은?',A:'말',B:'행동'},
+  {p:1,q:'커플아이템을 맞춘다면?',A:'많을수록 좋아',B:'1~2개면 충분해'},
+  {p:1,q:'더 끌리는 연애는?',A:'능이백숙같은 연애',B:'불닭같은 연애'},
+  {p:2,q:'더 선호하는 연애상대는?',A:'생활 루틴이 비슷한 사람',B:'사람이 좋으면 루틴은 상관없어'},
+  {p:2,q:'내 애인의 흡연 여부는?',A:'상관없어',B:'비흡연이 좋아'},
+  {p:2,q:'마지막 연애, 더 가까운 기간?',A:'1년',B:'3년'},
+  {p:2,q:'더 좋아하는 데이트는?',A:'집에서 둘만 있는 시간',B:'활동적인 야외데이트'},
+  {p:2,q:'연인과의 거리는?',A:'편도 2시간 이내여야 해',B:'2시간 이상도 괜찮아'},
+  {p:2,q:'연인과 커플아이템?',A:'많으면 많을수록 좋아',B:'1~2개면 충분해'},
+];
+const STAGE_CNT=[4,5,4];
+
+const STAGE_INTRO=[
+  {label:'1관문 — 자기 탐색',icon:'🔮',msg:'나는 어떤 공주일까요?\n냥~ 솔직하게 선택해봐요!'},
+  {label:'2관문 — 연애관 탐색',icon:'💜',msg:'연애에 대한 진짜 생각을\n털어놔 봐요!'},
+  {label:'3관문 — 마지막 시험',icon:'💎',msg:'이제 진짜 마음을\n꺼내볼 시간이에요!'},
+];
+const LOBBY_DESC=[
+  {badge:'🏰 LOBBY 1',title:'첫 번째 로비 도착!',msg:'잠깐 쉬어가요!\n내가 걸어온 경로를 확인해봐요.'},
+  {badge:'🏯 LOBBY 2',title:'두 번째 로비 도착!',msg:'한 걸음 더 왔어요!\n마지막 관문이 기다리고 있어요.'},
 ];
 
-const STAGES = [
-  {label:'1라운드 — 첫인상',icon:'👀',msg:'서로의 첫인상을 확인해봐요!\n각자 솔직하게 선택하세요.'},
-  {label:'2라운드 — 취향 탐색',icon:'🔍',msg:'취향이 맞는 사람을 찾아봐요!\n깊이 있는 선택을 해보세요.'},
-  {label:'3라운드 — 최후의 선택',icon:'💎',msg:'이제 마음을 결정할 시간!\n진짜 마음을 보여주세요.'},
-];
-
-const QUESTIONS = [
-  [
-    {q:'주말에 어디가 더 좋아?',A:'🏠 집에서 넷플릭스',B:'🌿 야외 나들이'},
-    {q:'첫 데이트 장소는?',A:'☕ 감성 카페',B:'🍽️ 분위기 좋은 레스토랑'},
-    {q:'연락 스타일은?',A:'💬 자주 자주',B:'🌙 필요할 때만'},
-    {q:'이상형 분위기는?',A:'😊 친근하고 밝은',B:'😎 차분하고 깊은'},
-  ],
-  [
-    {q:'여행 스타일은?',A:'🗺️ 꼼꼼한 계획파',B:'🎲 즉흥 자유여행'},
-    {q:'데이트할 때 밥은?',A:'🔥 새로운 맛집 도전',B:'🏠 집에서 요리'},
-    {q:'싸웠을 때는?',A:'💬 바로 대화로 해결',B:'🌬️ 시간이 필요해'},
-    {q:'영화는?',A:'😂 웃기고 가벼운 코미디',B:'😭 깊고 울리는 드라마'},
-    {q:'선물 스타일은?',A:'🎁 깜짝 서프라이즈',B:'🛍️ 원하는 거 직접'},
-  ],
-  [
-    {q:'10년 후 모습은?',A:'🏙️ 도시에서 커리어',B:'🌄 여유로운 시골'},
-    {q:'사랑의 언어는?',A:'🗣️ 말로 표현',B:'🤝 행동으로 표현'},
-    {q:'고민이 생기면?',A:'👥 친구에게 털어놓기',B:'🧘 혼자 정리하기'},
-    {q:'인생에서 더 중요한 건?',A:'💪 성취와 목표',B:'❤️ 관계와 감정'},
-  ],
-];
-
-let myId = sessionStorage.getItem('myId');
+// ─── State ────────────────────────────────────────────────────────
+let myId=sessionStorage.getItem('myId');
 if(!myId){myId=crypto.randomUUID();sessionStorage.setItem('myId',myId);}
-let roomId = sessionStorage.getItem('roomId') || null;
-let channel = null;
-let isHost = false;
+let roomId=sessionStorage.getItem('roomId')||null;
+let channel=null,isHost=false,cachedQs=null,lastRoomStatus='';
 
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function toast(msg,dur=2000){
-  const el=document.createElement('div');el.className='toast';el.textContent=msg;
-  document.body.appendChild(el);setTimeout(()=>el.remove(),dur);
-}
-function randCode(){
-  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let r='';for(let i=0;i<6;i++)r+=c[Math.floor(Math.random()*c.length)];return r;
-}
-function charOf(id){return CHARS.find(c=>c.id===id)||{name:'?',emoji:'❓',color:'#ccc',bg:'#f9f9f9'};}
+// ─── Utils ────────────────────────────────────────────────────────
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function toast(msg,dur=2200){const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),dur);}
+function randCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<6;i++)r+=c[Math.floor(Math.random()*c.length)];return r;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+function seededShuffle(arr,seed){
+  const a=[...arr];let s=seed>>>0;
+  for(let i=a.length-1;i>0;i--){s=(s*1664525+1013904223)>>>0;const j=s%(i+1);[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function getQs(room){
+  if(cachedQs)return cachedQs;
+  const seed=new Date(room.created_at).getTime()&0xffffffff;
+  const out=[];
+  for(let p=0;p<3;p++){
+    const pool=Q_POOL.filter(q=>q.p===p);
+    out.push(seededShuffle(pool,seed+p*997).slice(0,STAGE_CNT[p]));
+  }
+  cachedQs=out;return out;
+}
+
+function progHTML(stage,qi,qs,doneStages){
+  let h='<div class="prog">';
+  for(let s=0;s<3;s++){
+    const cnt=STAGE_CNT[s];
+    for(let i=0;i<cnt;i++){
+      const cls=s<stage||(s===stage&&i<qi)?'prog-dot done':s===stage&&i===qi?'prog-dot on':'prog-dot';
+      h+=`<div class="${cls}"></div>`;
+    }
+    if(s<2)h+='<div style="width:6px"></div>';
+  }
+  h+='</div>';return h;
+}
+
+// ─── Create / Join ────────────────────────────────────────────────
 async function doCreate(){
   const name=document.getElementById('inp-name').value.trim();
   if(!name){toast('이름을 입력해주세요!');return;}
   const code=randCode();
   const {data:room,error}=await sb.from('rooms').insert({code,host_id:myId}).select().single();
   if(error){toast('방 생성 실패 😢');console.error(error);return;}
-  roomId=room.id;sessionStorage.setItem('roomId',roomId);
-  isHost=true;
+  roomId=room.id;sessionStorage.setItem('roomId',roomId);isHost=true;
   await sb.from('players').insert({id:myId,room_id:roomId,name,is_host:true});
   subscribeRoom();syncAndRender();
 }
@@ -248,117 +376,166 @@ async function syncAndRender(){
   const room=r1.data,players=r2.data||[],answers=r3.data||[],finals=r4.data||[];
   if(!room)return;
   const me=players.find(p=>p.id===myId)||{};
-  isHost=me.is_host||false;
+  isHost=!!me.is_host;
   const s=room.status;
+  const statusChanged=s!==lastRoomStatus;
+  lastRoomStatus=s;
   if(s==='waiting')renderWait(room,players,me);
-  else if(s==='lobby')renderLobby(room);
+  else if(s==='lobby')renderLobby(room,answers,statusChanged);
   else if(s==='question')renderQ(room,players,answers);
   else if(s==='reveal')renderRev(room,players,answers);
   else if(s==='final')renderFinal(room,players,finals);
   else if(s==='ended')renderEnd(players,finals);
 }
 
+// ─── Waiting room ─────────────────────────────────────────────────
 function renderWait(room,players,me){
   show('s-wait');
   document.getElementById('room-code').textContent=room.code;
   document.getElementById('player-count').textContent=players.length;
   const taken=players.filter(p=>p.char_id>=0).map(p=>p.char_id);
   document.getElementById('player-list').innerHTML=players.map(p=>{
-    const c=charOf(p.char_id);
-    return `<div class="player-chip" style="background:${p.char_id>=0?c.bg:'#f5f5f5'};color:${p.char_id>=0?c.color:'#bbb'}">
-      ${p.char_id>=0?c.emoji:'👤'} ${p.name}${p.is_host?' 👑':''}
+    return `<div class="chip" style="background:#F3EEFF;color:#7B5EA7">
+      ${p.char_id>=0?avSVG(p.char_id):'<span style="font-size:1.4rem">👤</span>'}
+      <span>${esc(p.name)}${p.is_host?' 👑':''}</span>
     </div>`;
   }).join('');
-  document.getElementById('char-grid').innerHTML=CHARS.map(c=>{
-    const isMine=me.char_id===c.id;
-    const isTaken=taken.includes(c.id)&&!isMine;
-    return `<div class="char-card ${isMine?'selected-me':''} ${isTaken?'taken':''}" onclick="selectChar(${c.id})" style="border-color:${isMine?c.color:'transparent'}">
-      <div class="char-emoji">${c.emoji}</div>
-      <div class="char-name">${c.name}</div>
-      ${isTaken?'<div style="font-size:.65rem;color:#bbb">선택됨</div>':''}
+  document.getElementById('av-grid').innerHTML=AVATARS.map(av=>{
+    const isMine=me.char_id===av.id;
+    const isTaken=taken.includes(av.id)&&!isMine;
+    return `<div class="av-card ${isMine?'me':''} ${isTaken?'tk':''}" onclick="selectAv(${av.id})">
+      ${pSVG(av.s,av.hc)}
+      <div class="av-name">${av.name}</div>
     </div>`;
   }).join('');
-  const ready=players.every(p=>p.char_id>=0)&&players.length>=2;
-  document.getElementById('btn-start').style.display=isHost?'block':'none';
-  document.getElementById('btn-start').disabled=!ready;
-  document.getElementById('btn-start').textContent=ready?'게임 시작 🎮':`게임 시작 (${players.filter(p=>p.char_id>=0).length}/${players.length} 선택됨)`;
+  const ready=players.length>=2&&players.every(p=>p.char_id>=0);
+  const btnS=document.getElementById('btn-start');
+  btnS.style.display=isHost?'block':'none';
+  btnS.disabled=!ready;
+  btnS.textContent=ready?'게임 시작 🎮':`게임 시작 (${players.filter(p=>p.char_id>=0).length}/${players.length} 선택됨)`;
   document.getElementById('wait-msg').style.display=isHost?'none':'block';
 }
-async function selectChar(charId){
-  await sb.from('players').update({char_id:charId,emoji:CHARS[charId].emoji,color:CHARS[charId].color,bg:CHARS[charId].bg}).eq('room_id',roomId).eq('id',myId);
+async function selectAv(charId){
+  const av=AVATARS[charId]||AVATARS[0];
+  await sb.from('players').update({char_id:charId,emoji:av.name,color:'#7B5EA7',bg:'#F3EEFF'}).eq('room_id',roomId).eq('id',myId);
 }
 async function hostStart(){
   await sb.from('rooms').update({status:'lobby',stage:0}).eq('id',roomId);
 }
 
-function renderLobby(room){
+// ─── Lobby ────────────────────────────────────────────────────────
+function renderLobby(room,answers,animatePath){
   show('s-lobby');
-  const stg=STAGES[room.stage]||{icon:'✨',label:'준비됐나요?',msg:'게임을 시작해요!'};
-  document.getElementById('lobby-icon').textContent=stg.icon;
-  document.getElementById('lobby-title').textContent=stg.label;
-  document.getElementById('lobby-msg').textContent=stg.msg;
-  document.getElementById('btn-lobby-go').style.display=isHost?'block':'none';
-  document.getElementById('lobby-wait').style.display=isHost?'none':'block';
+  const stage=room.stage;
+  const pathSec=document.getElementById('path-section');
+
+  if(stage>0){
+    // Inter-stage lobby: show path for completed stage (stage-1)
+    const lb=LOBBY_DESC[stage-1]||{badge:'🏰 LOBBY',title:'로비 도착!',msg:''};
+    document.getElementById('lb-badge').textContent=lb.badge;
+    document.getElementById('lb-icon').textContent='🌟';
+    document.getElementById('lb-title').textContent=lb.title;
+    document.getElementById('lb-msg').textContent=lb.msg;
+    // Path animation
+    pathSec.style.display='block';
+    const prevStage=stage-1;
+    const qs=getQs(room)[prevStage]||[];
+    const track=document.getElementById('path-track');
+    track.innerHTML='';
+    qs.forEach((q,qi)=>{
+      const ans=answers.find(a=>a.player_id===myId&&a.stage===prevStage&&a.question_idx===qi);
+      const ch=ans?.choice;
+      const ansText=ch==='A'?q.A:ch==='B'?q.B:'?';
+      const row=document.createElement('div');
+      row.innerHTML=`
+        <div class="path-row">
+          <div class="path-dot ${ch?'c'+ch:''}" id="pd-${qi}">Q${qi+1}</div>
+          <div class="path-ans" id="pa-${qi}">${ch?`<b style="color:${ch==='A'?'#FFB5A7':'#9DD9D2'}">${ch}</b> ${esc(ansText)}`:'미응답'}</div>
+        </div>
+        ${qi<qs.length-1?'<div class="path-line"></div>':''}`;
+      track.appendChild(row);
+    });
+    const dest=document.createElement('div');
+    dest.style.cssText='text-align:center;padding:8px 0;font-size:.8rem;color:#aaa';
+    dest.textContent='🏰 로비 도착!';
+    track.appendChild(dest);
+    // Animate nodes appearing
+    qs.forEach((_,qi)=>{
+      setTimeout(()=>{
+        const dot=document.getElementById('pd-'+qi);
+        const ans=document.getElementById('pa-'+qi);
+        if(dot){dot.classList.add('show');}
+        if(ans)setTimeout(()=>ans.classList.add('show'),200);
+      },qi*380+100);
+    });
+  } else {
+    // Initial lobby (before stage 0)
+    const info=STAGE_INTRO[0];
+    document.getElementById('lb-badge').textContent='✨ 게임 시작!';
+    document.getElementById('lb-icon').textContent=info.icon;
+    document.getElementById('lb-title').textContent=info.label;
+    document.getElementById('lb-msg').textContent=info.msg;
+    pathSec.style.display='none';
+  }
+  document.getElementById('btn-lgo').style.display=isHost?'block':'none';
+  document.getElementById('lb-wait').style.display=isHost?'none':'block';
 }
 async function hostStartStage(){
   await sb.from('rooms').update({status:'question',question_idx:0}).eq('id',roomId);
 }
 
+// ─── Question ─────────────────────────────────────────────────────
 function renderQ(room,players,answers){
   show('s-q');
   const stage=room.stage,qi=room.question_idx;
-  const qs=QUESTIONS[stage]||[];
+  const qs=getQs(room)[stage]||[];
   const q=qs[qi];if(!q)return;
-  document.getElementById('q-counter').textContent=`${STAGES[stage]?.label||'질문'} · ${qi+1}/${qs.length}`;
+  document.getElementById('q-prog').innerHTML=progHTML(stage,qi);
+  document.getElementById('q-cnt').textContent=`${STAGE_INTRO[stage]?.label||'질문'} · ${qi+1}/${qs.length}`;
   document.getElementById('q-text').textContent=q.q;
-  document.getElementById('btn-A').textContent=q.A;
-  document.getElementById('btn-B').textContent=q.B;
+  document.getElementById('btn-A').textContent=`A.  ${q.A}`;
+  document.getElementById('btn-B').textContent=`B.  ${q.B}`;
   const myAns=answers.find(a=>a.player_id===myId&&a.stage===stage&&a.question_idx===qi);
-  const btnA=document.getElementById('btn-A'),btnB=document.getElementById('btn-B');
-  if(myAns){
-    btnA.className='choice-btn A'+(myAns.choice==='A'?' picked-A selected':'');
-    btnB.className='choice-btn B'+(myAns.choice==='B'?' picked-B selected':'');
-    document.getElementById('q-wait').style.display='block';
-  } else {
-    btnA.className='choice-btn A';btnB.className='choice-btn B';
-    document.getElementById('q-wait').style.display='none';
-  }
-  document.getElementById('q-status-bar').innerHTML=players.map(p=>{
+  document.getElementById('btn-A').className='cbtn A'+(myAns?.choice==='A'?' pA':'');
+  document.getElementById('btn-B').className='cbtn B'+(myAns?.choice==='B'?' pB':'');
+  document.getElementById('q-wait').style.display=myAns?'block':'none';
+  document.getElementById('q-sbar').innerHTML=players.map(p=>{
     const done=answers.some(a=>a.player_id===p.id&&a.stage===stage&&a.question_idx===qi);
-    const c=charOf(p.char_id);
-    return `<div class="player-chip" style="background:${done?c.bg:'#f5f5f5'};color:${done?c.color:'#bbb'}">${c.emoji} ${p.name} ${done?'✓':'…'}</div>`;
+    return `<div class="chip" style="background:${done?'#EEE8FA':'#f5f5f5'};color:${done?'#7B5EA7':'#bbb'}">
+      ${avSVG(p.char_id)} <span>${esc(p.name)} ${done?'✓':'…'}</span>
+    </div>`;
   }).join('');
   const allDone=players.every(p=>answers.some(a=>a.player_id===p.id&&a.stage===stage&&a.question_idx===qi));
-  if(allDone&&myAns){
-    sb.from('rooms').update({status:'reveal'}).eq('id',roomId).eq('status','question').then(()=>{});
-  }
+  if(allDone&&myAns)sb.from('rooms').update({status:'reveal'}).eq('id',roomId).eq('status','question').then(()=>{});
 }
 async function submitAnswer(choice){
   const {data:room}=await sb.from('rooms').select('stage,question_idx').eq('id',roomId).single();
+  if(!room)return;
   await sb.from('answers').upsert({room_id:roomId,player_id:myId,stage:room.stage,question_idx:room.question_idx,choice},{onConflict:'room_id,player_id,stage,question_idx'});
 }
 
+// ─── Reveal ───────────────────────────────────────────────────────
 function renderRev(room,players,answers){
   show('s-rev');
   const stage=room.stage,qi=room.question_idx;
-  const qs=QUESTIONS[stage]||[],q=qs[qi];
+  const qs=getQs(room)[stage]||[],q=qs[qi];
+  document.getElementById('rev-prog').innerHTML=progHTML(stage,qi);
   document.getElementById('rev-title').textContent=q?.q||'결과';
   document.getElementById('rev-list').innerHTML=answers.filter(a=>a.stage===stage&&a.question_idx===qi).map(a=>{
     const p=players.find(pl=>pl.id===a.player_id)||{};
-    const c=charOf(p.char_id);
-    return `<div class="result-row">
-      <span style="font-size:1.5rem">${c.emoji}</span>
-      <span style="font-weight:700;color:${c.color}">${p.name}</span>
-      <span style="flex:1;text-align:right;font-size:.9rem;background:${a.choice==='A'?'#FFB5A7':'#9DD9D2'};color:#fff;padding:3px 10px;border-radius:10px">
-        ${a.choice==='A'?(q?.A||'A'):(q?.B||'B')}
+    return `<div class="rrow">
+      ${avSVG(p.char_id)}
+      <span style="font-weight:700;color:#7B5EA7">${esc(p.name)}</span>
+      <span style="flex:1;text-align:right;font-size:.82rem;background:${a.choice==='A'?'#FFB5A7':'#9DD9D2'};color:#fff;padding:4px 12px;border-radius:10px;word-break:keep-all">
+        ${esc(a.choice==='A'?(q?.A||'A'):(q?.B||'B'))}
       </span>
     </div>`;
   }).join('');
   const isLastQ=qi>=(qs.length-1);
-  const isLastStage=stage>=(QUESTIONS.length-1);
-  document.getElementById('btn-next-q').style.display=isHost&&!isLastQ?'block':'none';
-  document.getElementById('btn-next-stage').style.display=isHost&&isLastQ&&!isLastStage?'block':'none';
-  document.getElementById('btn-to-final').style.display=isHost&&isLastQ&&isLastStage?'block':'none';
+  const isLastStage=stage>=(STAGE_INTRO.length-1);
+  document.getElementById('btn-nq').style.display=isHost&&!isLastQ?'block':'none';
+  document.getElementById('btn-ns').style.display=isHost&&isLastQ&&!isLastStage?'block':'none';
+  document.getElementById('btn-fin').style.display=isHost&&isLastQ&&isLastStage?'block':'none';
   document.getElementById('rev-wait').style.display=isHost?'none':'block';
 }
 async function hostNextQ(){
@@ -373,23 +550,23 @@ async function hostToFinal(){
   await sb.from('rooms').update({status:'final'}).eq('id',roomId);
 }
 
+// ─── Final choice ─────────────────────────────────────────────────
 function renderFinal(room,players,finals){
   show('s-final');
-  const myFinal=finals.find(f=>f.player_id===myId);
+  const myF=finals.find(f=>f.player_id===myId);
   document.getElementById('final-list').innerHTML=players.filter(p=>p.id!==myId).map(p=>{
-    const c=charOf(p.char_id),picked=myFinal?.target_id===p.id;
-    return `<button onclick="submitFinal('${p.id}')" style="width:100%;padding:14px;border:3px solid ${picked?c.color:'#eee'};border-radius:16px;background:${picked?c.bg:'#fff'};cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s${myFinal?';pointer-events:none':''}">
-      <span style="font-size:2rem">${c.emoji}</span>
-      <span style="font-weight:700;color:${c.color};font-size:1rem">${p.name}</span>
-      ${picked?`<span style="margin-left:auto;color:${c.color}">💌</span>`:''}
+    const picked=myF?.target_id===p.id;
+    return `<button onclick="submitFinal('${esc(p.id)}')" style="width:100%;padding:14px;border:3px solid ${picked?'#C8B6E2':'#eee'};border-radius:16px;background:${picked?'#F3EEFF':'#fff'};cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s${myF?';pointer-events:none':''}">
+      ${avSVG(p.char_id)}
+      <span style="font-weight:700;color:#7B5EA7;font-size:1rem">${esc(p.name)}</span>
+      ${picked?'<span style="margin-left:auto">💌</span>':''}
     </button>`;
   }).join('');
-  document.getElementById('final-status-bar').innerHTML=players.map(p=>{
+  document.getElementById('final-sbar').innerHTML=players.map(p=>{
     const done=finals.some(f=>f.player_id===p.id);
-    const c=charOf(p.char_id);
-    return `<div class="player-chip" style="background:${done?c.bg:'#f5f5f5'};color:${done?c.color:'#bbb'}">${c.emoji} ${p.name} ${done?'✓':'…'}</div>`;
+    return `<div class="chip" style="background:${done?'#EEE8FA':'#f5f5f5'};color:${done?'#7B5EA7':'#bbb'}">${avSVG(p.char_id)} <span>${esc(p.name)} ${done?'✓':'…'}</span></div>`;
   }).join('');
-  document.getElementById('final-wait').style.display=myFinal?'block':'none';
+  document.getElementById('final-wait').style.display=myF?'block':'none';
   if(players.length>0&&players.every(p=>finals.some(f=>f.player_id===p.id))){
     sb.from('rooms').update({status:'ended'}).eq('id',roomId).eq('status','final').then(()=>{});
   }
@@ -398,44 +575,49 @@ async function submitFinal(targetId){
   await sb.from('final_choices').upsert({room_id:roomId,player_id:myId,target_id:targetId},{onConflict:'room_id,player_id'});
 }
 
+// ─── End ──────────────────────────────────────────────────────────
 function renderEnd(players,finals){
   show('s-end');
   const matches=[],used=new Set();
   players.forEach(p=>{
     if(used.has(p.id))return;
-    const chosen=finals.find(f=>f.player_id===p.id)?.target_id;
-    if(!chosen)return;
-    const reverse=finals.find(f=>f.player_id===chosen)?.target_id;
-    if(reverse===p.id&&!used.has(chosen)){
-      matches.push([p,players.find(pl=>pl.id===chosen)]);
-      used.add(p.id);used.add(chosen);
+    const ch=finals.find(f=>f.player_id===p.id)?.target_id;
+    if(!ch)return;
+    const rv=finals.find(f=>f.player_id===ch)?.target_id;
+    if(rv===p.id&&!used.has(ch)){
+      matches.push([p,players.find(pl=>pl.id===ch)]);
+      used.add(p.id);used.add(ch);
     }
   });
+  const me=players.find(p=>p.id===myId)||{};
+  const myMatch=matches.find(([a,b])=>a.id===myId||b.id===myId);
+  const total=matches.length;
   let html='';
-  if(matches.length===0){
-    html=`<div class="card" style="text-align:center;margin-bottom:16px"><div style="font-size:3rem">🐱</div><p style="margin-top:12px;color:#aaa">이번엔 아무도 매칭되지 않았어요.<br>다음엔 꼭 연결되길! 🍀</p></div>`;
+  if(myMatch){
+    const partner=myMatch[0].id===myId?myMatch[1]:myMatch[0];
+    html=`<div class="matchcard" style="margin-bottom:14px">
+      <div style="font-size:.7rem;color:#C8B6E2;font-weight:700;letter-spacing:.12em;margin-bottom:10px">💌 하트 문으로 탈출 성공!</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:12px">
+        <div style="text-align:center">${avSVG(me.char_id)}<div style="font-size:.8rem;font-weight:700;color:#7B5EA7;margin-top:3px">${esc(me.name)}</div></div>
+        <div style="font-size:1.8rem">💘</div>
+        <div style="text-align:center">${avSVG(partner.char_id)}<div style="font-size:.8rem;font-weight:700;color:#7B5EA7;margin-top:3px">${esc(partner.name)}</div></div>
+      </div>
+      <p style="font-size:.82rem;color:#aaa">이번 게임에서 총 <b style="color:#C8B6E2">${total}쌍</b>이 함께 탈출했어요! 🎊</p>
+    </div>`;
   } else {
-    html=matches.map(([a,b])=>{
-      const ca=charOf(a.char_id),cb=charOf(b.char_id);
-      return `<div class="card" style="text-align:center;margin-bottom:12px">
-        <div class="match-badge" style="margin-bottom:10px">💘 MATCH!</div>
-        <div style="display:flex;align-items:center;justify-content:center;gap:16px">
-          <div><div style="font-size:2.5rem">${ca.emoji}</div><div style="font-weight:700;color:${ca.color}">${a.name}</div></div>
-          <div style="font-size:1.5rem">❤️</div>
-          <div><div style="font-size:2.5rem">${cb.emoji}</div><div style="font-weight:700;color:${cb.color}">${b.name}</div></div>
-        </div>
-      </div>`;
-    }).join('');
+    html=`<div class="catend" style="margin-bottom:14px">
+      <span class="bigcat">🐱</span>
+      <div style="font-size:1.1rem;font-weight:900;color:#7B5EA7;margin:14px 0 8px">나갈래 고양이가 반겨요!</div>
+      <div style="background:#F3EEFF;border-radius:18px;padding:16px;margin-bottom:10px">
+        <p style="color:#555;font-size:.88rem;line-height:1.8;word-break:keep-all">
+          "냥~ 혼자서도 충분히 멋진 공주야! 🌟<br>
+          고양이 문은 진짜 자신을 아는<br>특별한 공주만 통과할 수 있는 문이냥~<br>
+          언젠간 꼭 하트 문도 열릴 거야냥! 🐾"
+        </p>
+      </div>
+      <p style="font-size:.8rem;color:#aaa">이번 게임에서 <b style="color:#C8B6E2">${total}쌍</b>이 하트 문으로 탈출했어요</p>
+    </div>`;
   }
-  html+=`<div class="card"><div class="section-label" style="margin-bottom:10px">모두의 선택</div>`;
-  players.forEach(p=>{
-    const c=charOf(p.char_id);
-    const chosen=finals.find(f=>f.player_id===p.id)?.target_id;
-    const target=players.find(pl=>pl.id===chosen);
-    const ct=charOf(target?.char_id);
-    html+=`<div class="result-row"><span style="font-size:1.4rem">${c.emoji}</span><span style="font-weight:700;color:${c.color}">${p.name}</span><span style="margin-left:auto">→</span><span style="font-size:1.4rem">${target?ct.emoji:'❓'}</span><span style="font-weight:600;color:${ct.color}">${target?.name||'?'}</span></div>`;
-  });
-  html+='</div>';
   document.getElementById('end-content').innerHTML=html;
 }
 </script>
