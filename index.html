@@ -366,6 +366,7 @@ const STAGE_INTRO=[
 const LOBBY_DESC=[
   {badge:'🏰 LOBBY 1',title:'첫 번째 로비 도착!',msg:'잠깐 쉬어가요! 공주들의 경로를 확인해봐요.'},
   {badge:'🏯 LOBBY 2',title:'두 번째 로비 도착!',msg:'마지막 관문이 기다리고 있어요!'},
+  {badge:'🎀 LOBBY 3',title:'세 번째 로비 도착!',msg:'모든 관문을 통과했어요!\n이제 최종 선택이 남았어요!'},
 ];
 
 // ─── State ─────────────────────────────────────────────────────
@@ -518,7 +519,11 @@ function renderLobby(room,players,answers){
     boardWrap.style.display='none';
     boardAnimRunning=false;
   }
-  document.getElementById('btn-lgo').style.display=isHost?'block':'none';
+  const isFinalLobby=stage>=STAGE_INTRO.length;
+  const lgoBtn=document.getElementById('btn-lgo');
+  lgoBtn.textContent=isFinalLobby?'최종 선택으로 💌':'다음 관문으로! 🎯';
+  lgoBtn.onclick=isFinalLobby?hostToFinal:hostStartStage;
+  lgoBtn.style.display=isHost?'block':'none';
   document.getElementById('lb-wait').style.display=isHost?'none':'block';
 }
 
@@ -526,9 +531,8 @@ async function startBoardAnim(stage,players,answers,room){
   const inner=document.getElementById('board-inner');
   inner.innerHTML='';
   const qs=getQs(room)[stage]||[];
-  // 커스텀 Q: stage가 이미 +1 됐으므로 question_idx = stage-1 로 저장돼 있음
   const cqRaw=room.custom_q?JSON.parse(room.custom_q):null;
-  const cqIdx=stage-1;
+  const cqIdx=stage;
   const hasCQ=!!cqRaw&&answers.some(a=>a.stage===99&&a.question_idx===cqIdx);
   const allQs=hasCQ?[...qs,{q:cqRaw.q,A:cqRaw.A,B:cqRaw.B,isCQ:true}]:[...qs];
   const N=allQs.length;
@@ -886,7 +890,9 @@ async function hostAfterCustomRev(){
   await sb.from('rooms').update({status:'lobby',stage:room.stage+1,question_idx:0}).eq('id',roomId);
 }
 async function hostAfterCustomRevFinal(){
-  await sb.from('rooms').update({status:'final'}).eq('id',roomId);
+  const {data:room}=await sb.from('rooms').select('stage').eq('id',roomId).single();
+  boardAnimRunning=false;
+  await sb.from('rooms').update({status:'lobby',stage:room.stage+1,question_idx:0}).eq('id',roomId);
 }
 async function submitCQAnswer(choice,cqIdx){
   if(_cqAnswered)return;
