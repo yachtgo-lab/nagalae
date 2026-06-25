@@ -314,8 +314,13 @@ function pSVG(style,hc){
     `<ellipse cx="30" cy="17" rx="20" ry="15" fill="${hc}"/><circle cx="11" cy="27" r="8.5" fill="${hc}"/><circle cx="49" cy="27" r="8.5" fill="${hc}"/><circle cx="13" cy="42" r="6" fill="${hc}"/><circle cx="47" cy="42" r="6" fill="${hc}"/>`,
     `<path d="M14,33 Q14,10 30,10 Q46,10 46,33 L44,27 Q38,16 30,16 Q22,16 16,27Z" fill="${hc}"/><ellipse cx="30" cy="10" rx="12" ry="9" fill="${hc}"/><ellipse cx="30" cy="4" rx="7" ry="6" fill="${hc}"/><circle cx="23" cy="8" r="3.5" fill="${hc}"/><circle cx="37" cy="8" r="3.5" fill="${hc}"/>`,
     `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 L47,62 Q38,68 30,68 Q22,68 13,62Z" fill="${hc}"/><path d="M15,28 Q20,18 30,18 Q40,18 45,28 L43,23 Q36,15 30,15 Q24,15 17,23Z" fill="${hc}"/>`,
+    ``,
+    `<ellipse cx="30" cy="22" rx="16" ry="13" fill="#FFD700"/><rect x="14" y="22" width="32" height="8" rx="4" fill="#FFD700"/>`,
+    `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 L44,41 Q36,48 30,48 Q24,48 16,41Z" fill="#FF69B4"/>`,
+    `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 L47,62 Q38,68 30,68 Q22,68 13,62Z" fill="#C0C0C0"/>`,
+    `<path d="M14,31 Q14,9 30,9 Q46,9 46,31 C48,44 50,52 44,58 C40,62 34,59 30,63 C26,67 20,63 16,59 C10,53 12,44 14,31Z" fill="#9400D3"/>`,
   ];
-  return `<svg viewBox="0 0 60 72" width="40" height="40" xmlns="http://www.w3.org/2000/svg">${hairs[style%10]||hairs[0]}${base}</svg>`;
+  return `<svg viewBox="0 0 60 72" width="40" height="40" xmlns="http://www.w3.org/2000/svg">${hairs[style%15]||hairs[0]}${base}</svg>`;
 }
 const AVATARS=[
   {id:0,name:'숏컷',s:0,hc:'#3D2B1F'},{id:1,name:'단발',s:1,hc:'#8B4513'},
@@ -323,6 +328,9 @@ const AVATARS=[
   {id:4,name:'포니테일',s:4,hc:'#4B0082'},{id:5,name:'양갈래',s:5,hc:'#A0522D'},
   {id:6,name:'반묶음',s:6,hc:'#000080'},{id:7,name:'곱슬',s:7,hc:'#2E8B57'},
   {id:8,name:'올림머리',s:8,hc:'#8B008B'},{id:9,name:'앞머리',s:9,hc:'#2F4F4F'},
+  {id:10,name:'대머리',s:10,hc:'#FDDBB4'},{id:11,name:'금발숏컷',s:11,hc:'#FFD700'},
+  {id:12,name:'핑크단발',s:12,hc:'#FF69B4'},{id:13,name:'은발긴머리',s:13,hc:'#C0C0C0'},
+  {id:14,name:'보라웨이브',s:14,hc:'#9400D3'},
 ];
 function avOf(id){return AVATARS.find(a=>a.id===id)||AVATARS[0];}
 function avSVG(id){const a=avOf(id);return pSVG(a.s,a.hc);}
@@ -428,6 +436,8 @@ async function doJoin(){
   const {data:room,error}=await sb.from('rooms').select().eq('code',code).single();
   if(error||!room){toast('방을 찾을 수 없어요 😢');return;}
   if(room.status!=='waiting'){toast('이미 시작된 게임이에요!');return;}
+  const {data:existingPlayers}=await sb.from('players').select('id').eq('room_id',room.id);
+  if(existingPlayers&&existingPlayers.length>=10){toast('최대 10명까지 입장 가능해요! 😢');return;}
   roomId=room.id;sessionStorage.setItem('roomId',roomId);isHost=false;
   const {error:pe}=await sb.from('players').insert({id:myId,room_id:roomId,name,is_host:false});
   if(pe&&pe.code!=='23505'){toast('입장 실패 😢');console.error(pe);return;}
