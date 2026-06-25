@@ -50,14 +50,18 @@ input:focus{border-color:#7B5EA7}
 .qcnt{font-size:.78rem;color:#aaa;text-align:center}
 
 /* 카드덱 애니메이션 */
-.deck-wrap{position:relative;width:100%;height:54px;margin-bottom:6px;display:flex;justify-content:center;align-items:center}
-.deck-card{position:absolute;width:44px;height:60px;border-radius:10px;background:linear-gradient(135deg,#C8B6E2,#9B7FD4);border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:1.4rem;transform-origin:bottom center}
-@keyframes deckFan{0%{transform:rotate(0deg) translateY(0)}40%{transform:rotate(var(--r)) translateY(-6px)}70%{transform:rotate(var(--r)) translateY(-6px)}100%{transform:rotate(0deg) translateY(0)}}
-@keyframes cardDeal{0%{transform:scale(1) translateY(0);opacity:1}30%{transform:scale(1.18) translateY(-22px);opacity:1}60%{transform:scale(1.12) translateY(-18px);opacity:1}100%{transform:scale(1) translateY(0);opacity:0}}
-.deck-card.fan{animation:deckFan .6s ease-in-out forwards}
-.deck-card.deal{animation:cardDeal .55s ease-in-out forwards}
-@keyframes qCardIn{0%{opacity:0;transform:translateY(-30px) scale(.9) rotateX(20deg)}60%{transform:translateY(4px) scale(1.02) rotateX(-3deg)}100%{opacity:1;transform:translateY(0) scale(1) rotateX(0)}}
-.q-card-anim{animation:qCardIn .45s cubic-bezier(.22,1,.36,1) forwards}
+.deck-scene{perspective:800px;width:100%;display:flex;justify-content:center;margin-bottom:10px}
+.deck-wrap{position:relative;width:60px;height:84px}
+.deck-card{position:absolute;width:60px;height:84px;border-radius:12px;background:linear-gradient(135deg,#C8B6E2 0%,#9B7FD4 50%,#7B5EA7 100%);border:2px solid rgba(255,255,255,.6);box-shadow:0 4px 14px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;font-size:1.8rem;transform-origin:bottom center;backface-visibility:hidden}
+@keyframes deckShuffle{0%{transform:rotate(0) translate(0,0)}25%{transform:rotate(var(--r)) translate(var(--tx),calc(var(--r)*-0.5px))}75%{transform:rotate(var(--r)) translate(var(--tx),calc(var(--r)*-0.5px))}100%{transform:rotate(0) translate(0,0)}}
+@keyframes cardFlyOut{0%{transform:translate(0,0) rotateY(0deg);z-index:20}40%{transform:translate(0,-120px) rotateY(90deg)}100%{transform:translate(0,-260px) rotateY(180deg);opacity:0}}
+.deck-card.shuffle{animation:deckShuffle .5s ease-in-out forwards}
+.deck-card.flyout{animation:cardFlyOut .6s cubic-bezier(.4,0,.2,1) forwards;z-index:20}
+/* 질문 카드 플립 */
+.q-flip-wrap{perspective:900px;width:100%}
+.q-flip-inner{position:relative;width:100%;transform-style:preserve-3d;animation:flipReveal .55s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes flipReveal{0%{transform:translateY(-40px) rotateY(180deg) scale(.85)}60%{transform:translateY(6px) rotateY(-8deg) scale(1.03)}100%{transform:translateY(0) rotateY(0deg) scale(1)}}
+.q-card-anim{animation:flipReveal .55s cubic-bezier(.4,0,.2,1) forwards}
 .intro-card{background:linear-gradient(160deg,#1a1035 0%,#2d1b69 60%,#1a1035 100%);border-radius:26px;padding:26px;width:100%;text-align:center;color:#fff;position:relative;overflow:hidden}
 .intro-card::before{content:'✦';position:absolute;font-size:8rem;opacity:.05;top:-20px;left:50%;transform:translateX(-50%)}
 .rrow{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:#f9f5ff;margin-bottom:7px}
@@ -148,18 +152,25 @@ input:focus{border-color:#7B5EA7}
   <div class="prog" id="q-prog"></div>
   <div class="qcnt" id="q-cnt"></div>
   <!-- 카드덱 -->
-  <div class="deck-wrap" id="deck-wrap">
-    <div class="deck-card" style="--r:-18deg;z-index:1">🂠</div>
-    <div class="deck-card" style="--r:-8deg;z-index:2">🂠</div>
-    <div class="deck-card" style="--r:0deg;z-index:3">🂠</div>
-    <div class="deck-card" style="--r:8deg;z-index:4">🂠</div>
-    <div class="deck-card" style="--r:18deg;z-index:5">🂠</div>
+  <div class="deck-scene">
+    <div class="deck-wrap" id="deck-wrap">
+      <div class="deck-card" style="--r:-14deg;--tx:-10px;z-index:1">🂠</div>
+      <div class="deck-card" style="--r:-7deg;--tx:-5px;z-index:2">🂠</div>
+      <div class="deck-card" style="--r:0deg;--tx:0px;z-index:3" id="deck-flycard">✦</div>
+      <div class="deck-card" style="--r:7deg;--tx:5px;z-index:4">🂠</div>
+      <div class="deck-card" style="--r:14deg;--tx:10px;z-index:5">🂠</div>
+    </div>
   </div>
-  <div class="cat-wrap q-card-anim" id="q-card">
-    <div class="cat-ico">🐱</div>
-    <div class="cat-bbl">
-      <div class="cat-lbl">냥~ 질문할게요!</div>
-      <div id="q-text"></div>
+  <!-- 질문 카드 (덱에서 날아온 카드처럼 플립) -->
+  <div class="q-flip-wrap" id="q-flip-wrap" style="opacity:0">
+    <div class="q-flip-inner" id="q-flip-inner">
+      <div class="cat-wrap" id="q-card">
+        <div class="cat-ico">🐱</div>
+        <div class="cat-bbl">
+          <div class="cat-lbl">냥~ 질문할게요!</div>
+          <div id="q-text"></div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="sbar" id="q-sbar"></div>
@@ -640,25 +651,37 @@ function renderQ(room,players,answers){
   document.getElementById('q-text').textContent=q.q;
   document.getElementById('btn-A').textContent=`A.  ${q.A}`;
   document.getElementById('btn-B').textContent=`B.  ${q.B}`;
-  // 카드덱 뽑기 애니메이션
+  // 카드덱 셔플 → 가운데 카드 날아오르며 플립 → 질문 카드 등장
   const cards=[...document.querySelectorAll('#deck-wrap .deck-card')];
-  const qCard=document.getElementById('q-card');
+  const flyCard=document.getElementById('deck-flycard');
+  const flipWrap=document.getElementById('q-flip-wrap');
+  const flipInner=document.getElementById('q-flip-inner');
+  // 초기화
   cards.forEach(c=>{c.className='deck-card';void c.offsetWidth;});
-  qCard.style.opacity='0';
+  flipWrap.style.opacity='0';
+  flipInner.className='q-flip-inner';
+  // 1단계: 카드 셔플
   cards.forEach((c,i)=>{
-    c.style.animationDelay=`${i*60}ms`;
-    c.classList.add('fan');
+    c.style.animationDelay=`${i*55}ms`;
+    c.classList.add('shuffle');
   });
-  // 마지막 카드 딜 → 질문카드 등장
-  const last=cards[Math.floor(cards.length/2)];
-  last.addEventListener('animationend',()=>{
-    last.classList.add('deal');
+  // 2단계: 가운데 카드 날아오르기 (셔플 끝나고)
+  setTimeout(()=>{
+    flyCard.classList.remove('shuffle');
+    void flyCard.offsetWidth;
+    flyCard.classList.add('flyout');
+  }, 550);
+  // 3단계: 질문 카드 플립 등장 (카드 날아오른 직후)
+  setTimeout(()=>{
+    flipWrap.style.opacity='1';
+    void flipInner.offsetWidth;
+    flipInner.classList.add('q-card-anim');
+    // 날아간 카드 초기화
     setTimeout(()=>{
-      qCard.className='cat-wrap q-card-anim';
-      void qCard.offsetWidth;
-      qCard.style.opacity='';
-    },200);
-  },{once:true});
+      flyCard.className='deck-card';
+      flyCard.style.opacity='1';
+    }, 300);
+  }, 880);
   const myAns=answers.find(a=>a.player_id===myId&&a.stage===stage&&a.question_idx===qi);
   document.getElementById('btn-A').className='cbtn A'+(myAns?.choice==='A'?' pA':'');
   document.getElementById('btn-B').className='cbtn B'+(myAns?.choice==='B'?' pB':'');
