@@ -722,15 +722,16 @@ function renderAnsweringCustomQ(room,players,answers){
   show('s-custom-qa');
   const cq=room.custom_q?JSON.parse(room.custom_q):{q:'?',A:'A',B:'B'};
   document.getElementById('cqa-q').textContent=cq.q;
-  const myAns=answers.find(a=>a.player_id===myId&&a.stage===99&&a.question_idx===0);
+  const cqIdx=room.stage; // 라운드별 고유 인덱스 (이전 라운드 답변과 충돌 방지)
+  const myAns=answers.find(a=>a.player_id===myId&&a.stage===99&&a.question_idx===cqIdx);
   _cqAnswered=!!myAns;
   document.getElementById('cqa-btns').innerHTML=`
-    <button onclick="submitCQAnswer('A')" style="width:100%;padding:14px;border:3px solid ${myAns?.choice==='A'?'#FFB5A7':'#eee'};border-radius:16px;background:${myAns?.choice==='A'?'#FFF0EE':'#fff'};cursor:pointer;font-weight:700;font-size:.95rem;color:#D45F5F;word-break:keep-all;transition:all .15s${myAns?';pointer-events:none':''}">
+    <button onclick="submitCQAnswer('A',${cqIdx})" style="width:100%;padding:14px;border:3px solid ${myAns?.choice==='A'?'#FFB5A7':'#eee'};border-radius:16px;background:${myAns?.choice==='A'?'#FFF0EE':'#fff'};cursor:pointer;font-weight:700;font-size:.95rem;color:#D45F5F;word-break:keep-all;transition:all .15s${myAns?';pointer-events:none':''}">
       A. ${esc(cq.A)}</button>
-    <button onclick="submitCQAnswer('B')" style="width:100%;padding:14px;border:3px solid ${myAns?.choice==='B'?'#9DD9D2':'#eee'};border-radius:16px;background:${myAns?.choice==='B'?'#EDFAF8':'#fff'};cursor:pointer;font-weight:700;font-size:.95rem;color:#3A9E98;word-break:keep-all;transition:all .15s${myAns?';pointer-events:none':''}">
+    <button onclick="submitCQAnswer('B',${cqIdx})" style="width:100%;padding:14px;border:3px solid ${myAns?.choice==='B'?'#9DD9D2':'#eee'};border-radius:16px;background:${myAns?.choice==='B'?'#EDFAF8':'#fff'};cursor:pointer;font-weight:700;font-size:.95rem;color:#3A9E98;word-break:keep-all;transition:all .15s${myAns?';pointer-events:none':''}">
       B. ${esc(cq.B)}</button>`;
   document.getElementById('cqa-done').style.display=myAns?'block':'none';
-  const doneCount=players.filter(p=>answers.some(a=>a.player_id===p.id&&a.stage===99&&a.question_idx===0)).length;
+  const doneCount=players.filter(p=>answers.some(a=>a.player_id===p.id&&a.stage===99&&a.question_idx===cqIdx)).length;
   document.getElementById('cqa-prog').textContent=`${doneCount}/${players.length}명 답변 완료`;
   // 전원 답변 시 다음 단계로
   if(doneCount===players.length&&players.length>0){
@@ -748,10 +749,10 @@ function renderAnsweringCustomQ(room,players,answers){
     });
   }
 }
-async function submitCQAnswer(choice){
+async function submitCQAnswer(choice,cqIdx){
   if(_cqAnswered)return;
   _cqAnswered=true;
-  await sb.from('answers').upsert({room_id:roomId,player_id:myId,stage:99,question_idx:0,choice},{onConflict:'room_id,player_id,stage,question_idx'});
+  await sb.from('answers').upsert({room_id:roomId,player_id:myId,stage:99,question_idx:cqIdx,choice},{onConflict:'room_id,player_id,stage,question_idx'});
 }
 
 // ─── Final choice ─────────────────────────────────────────────────
