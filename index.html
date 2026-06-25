@@ -49,19 +49,23 @@ input:focus{border-color:#7B5EA7}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 .qcnt{font-size:.78rem;color:#aaa;text-align:center}
 
-/* 카드덱 애니메이션 */
-.deck-scene{perspective:800px;width:100%;display:flex;justify-content:center;margin-bottom:10px}
-.deck-wrap{position:relative;width:60px;height:84px}
-.deck-card{position:absolute;width:60px;height:84px;border-radius:12px;background:linear-gradient(135deg,#C8B6E2 0%,#9B7FD4 50%,#7B5EA7 100%);border:2px solid rgba(255,255,255,.6);box-shadow:0 4px 14px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;font-size:1.8rem;transform-origin:bottom center;backface-visibility:hidden}
-@keyframes deckShuffle{0%{transform:rotate(0) translate(0,0)}25%{transform:rotate(var(--r)) translate(var(--tx),calc(var(--r)*-0.5px))}75%{transform:rotate(var(--r)) translate(var(--tx),calc(var(--r)*-0.5px))}100%{transform:rotate(0) translate(0,0)}}
-@keyframes cardFlyOut{0%{transform:translate(0,0) rotateY(0deg);z-index:20}40%{transform:translate(0,-120px) rotateY(90deg)}100%{transform:translate(0,-260px) rotateY(180deg);opacity:0}}
-.deck-card.shuffle{animation:deckShuffle .5s ease-in-out forwards}
-.deck-card.flyout{animation:cardFlyOut .6s cubic-bezier(.4,0,.2,1) forwards;z-index:20}
-/* 질문 카드 플립 */
-.q-flip-wrap{perspective:900px;width:100%}
-.q-flip-inner{position:relative;width:100%;transform-style:preserve-3d;animation:flipReveal .55s cubic-bezier(.4,0,.2,1) forwards}
-@keyframes flipReveal{0%{transform:translateY(-40px) rotateY(180deg) scale(.85)}60%{transform:translateY(6px) rotateY(-8deg) scale(1.03)}100%{transform:translateY(0) rotateY(0deg) scale(1)}}
-.q-card-anim{animation:flipReveal .55s cubic-bezier(.4,0,.2,1) forwards}
+/* ── 카드덱 애니메이션 ── */
+.deck-scene{width:100%;display:flex;justify-content:center;align-items:flex-end;height:130px;position:relative;margin-bottom:8px}
+.dcard{position:absolute;width:62px;height:88px;border-radius:12px;background:linear-gradient(150deg,#D4B8F0 0%,#9B7FD4 60%,#7052B2 100%);border:2px solid rgba(255,255,255,.7);box-shadow:0 4px 14px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:1.4rem;transform-origin:bottom center;transition:transform .45s cubic-bezier(.4,0,.2,1),opacity .3s}
+/* 흔들 */
+@keyframes wobble{0%{transform:rotate(0)}20%{transform:rotate(-6deg)}45%{transform:rotate(5deg)}65%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}100%{transform:rotate(0)}}
+.dcard.wobble{animation:wobble .55s ease-in-out}
+/* 3D 뒤집기용 */
+.flip-card-wrap{perspective:700px;position:absolute;width:62px;height:88px;bottom:0}
+.flip-card-inner{width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,0,.2,1)}
+.flip-card-inner.flipped{transform:rotateY(180deg)}
+.flip-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;border:2px solid rgba(255,255,255,.7)}
+.flip-front{background:linear-gradient(150deg,#D4B8F0 0%,#9B7FD4 60%,#7052B2 100%);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:1.4rem;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.flip-back{background:#fff;transform:rotateY(180deg);box-shadow:0 4px 14px rgba(0,0,0,.22)}
+/* 질문카드 펼쳐짐 */
+@keyframes cardExpand{0%{width:62px;height:88px;border-radius:12px}100%{width:100%;height:auto;border-radius:18px}}
+.q-reveal{animation:qRevealIn .4s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes qRevealIn{0%{opacity:0;transform:scale(.92) translateY(-10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 .intro-card{background:linear-gradient(160deg,#1a1035 0%,#2d1b69 60%,#1a1035 100%);border-radius:26px;padding:26px;width:100%;text-align:center;color:#fff;position:relative;overflow:hidden}
 .intro-card::before{content:'✦';position:absolute;font-size:8rem;opacity:.05;top:-20px;left:50%;transform:translateX(-50%)}
 .rrow{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:#f9f5ff;margin-bottom:7px}
@@ -151,25 +155,28 @@ input:focus{border-color:#7B5EA7}
 <div id="s-q" class="screen">
   <div class="prog" id="q-prog"></div>
   <div class="qcnt" id="q-cnt"></div>
-  <!-- 카드덱 -->
-  <div class="deck-scene">
-    <div class="deck-wrap" id="deck-wrap">
-      <div class="deck-card" style="--r:-14deg;--tx:-10px;z-index:1">🂠</div>
-      <div class="deck-card" style="--r:-7deg;--tx:-5px;z-index:2">🂠</div>
-      <div class="deck-card" style="--r:0deg;--tx:0px;z-index:3" id="deck-flycard">✦</div>
-      <div class="deck-card" style="--r:7deg;--tx:5px;z-index:4">🂠</div>
-      <div class="deck-card" style="--r:14deg;--tx:10px;z-index:5">🂠</div>
+  <!-- 카드덱 씬 -->
+  <div class="deck-scene" id="deck-scene">
+    <!-- 뒤 카드들 (부채꼴로 펼쳐짐) -->
+    <div class="dcard" id="dc0" style="z-index:1">✦</div>
+    <div class="dcard" id="dc1" style="z-index:2">✦</div>
+    <div class="dcard" id="dc3" style="z-index:4">✦</div>
+    <div class="dcard" id="dc4" style="z-index:5">✦</div>
+    <!-- 뒤집히는 카드 (3D flip) -->
+    <div class="flip-card-wrap" id="flip-wrap" style="z-index:10">
+      <div class="flip-card-inner" id="flip-inner">
+        <div class="flip-face flip-front">✦</div>
+        <div class="flip-face flip-back" id="flip-back-face"></div>
+      </div>
     </div>
   </div>
-  <!-- 질문 카드 (덱에서 날아온 카드처럼 플립) -->
-  <div class="q-flip-wrap" id="q-flip-wrap" style="opacity:0">
-    <div class="q-flip-inner" id="q-flip-inner">
-      <div class="cat-wrap" id="q-card">
-        <div class="cat-ico">🐱</div>
-        <div class="cat-bbl">
-          <div class="cat-lbl">냥~ 질문할게요!</div>
-          <div id="q-text"></div>
-        </div>
+  <!-- 질문 카드 (플립 후 등장) -->
+  <div id="q-card" style="width:100%;display:none">
+    <div class="cat-wrap">
+      <div class="cat-ico">🐱</div>
+      <div class="cat-bbl">
+        <div class="cat-lbl">냥~ 질문할게요!</div>
+        <div id="q-text"></div>
       </div>
     </div>
   </div>
@@ -643,6 +650,7 @@ async function hostStartStage(){
 function renderQ(room,players,answers){
   show('s-q');
   boardAnimRunning=false;
+  document.getElementById('deck-scene').style.display='';
   const stage=room.stage,qi=room.question_idx;
   const qs=getQs(room)[stage]||[];
   const q=qs[qi];if(!q)return;
@@ -651,37 +659,37 @@ function renderQ(room,players,answers){
   document.getElementById('q-text').textContent=q.q;
   document.getElementById('btn-A').textContent=`A.  ${q.A}`;
   document.getElementById('btn-B').textContent=`B.  ${q.B}`;
-  // 카드덱 셔플 → 가운데 카드 날아오르며 플립 → 질문 카드 등장
-  const cards=[...document.querySelectorAll('#deck-wrap .deck-card')];
-  const flyCard=document.getElementById('deck-flycard');
-  const flipWrap=document.getElementById('q-flip-wrap');
-  const flipInner=document.getElementById('q-flip-inner');
-  // 초기화
-  cards.forEach(c=>{c.className='deck-card';void c.offsetWidth;});
-  flipWrap.style.opacity='0';
-  flipInner.className='q-flip-inner';
-  // 1단계: 카드 셔플
-  cards.forEach((c,i)=>{
-    c.style.animationDelay=`${i*55}ms`;
-    c.classList.add('shuffle');
-  });
-  // 2단계: 가운데 카드 날아오르기 (셔플 끝나고)
+  // ── 카드덱 애니메이션 ──
+  // 팬 위치: [각도, x오프셋]
+  const fanPos=[[-30,-80],[-15,-42],[15,42],[30,80]];
+  const bgCards=['dc0','dc1','dc3','dc4'].map(id=>document.getElementById(id));
+  const flipWrap=document.getElementById('flip-wrap');
+  const flipInner=document.getElementById('flip-inner');
+  const qCard=document.getElementById('q-card');
+  // 초기화: 스택으로 모음
+  bgCards.forEach(c=>{c.style.transform='rotate(0deg) translateX(0)';c.style.opacity='1';});
+  flipWrap.style.transform='';flipInner.classList.remove('flipped');
+  qCard.style.display='none';
+  // 1단계: 흔들흔들
+  bgCards.forEach(c=>{c.classList.remove('wobble');void c.offsetWidth;c.classList.add('wobble');});
+  flipInner.querySelector('.flip-front').classList.remove('wobble');
+  void flipInner.querySelector('.flip-front').offsetWidth;
+  flipInner.querySelector('.flip-front').classList.add('wobble');
+  // 2단계: 촤르륵 펼치기
   setTimeout(()=>{
-    flyCard.classList.remove('shuffle');
-    void flyCard.offsetWidth;
-    flyCard.classList.add('flyout');
-  }, 550);
-  // 3단계: 질문 카드 플립 등장 (카드 날아오른 직후)
+    bgCards.forEach((c,i)=>{
+      const [deg,tx]=fanPos[i];
+      c.style.transform=`rotate(${deg}deg) translateX(${tx}px) translateY(${Math.abs(deg)*0.6}px)`;
+    });
+  }, 580);
+  // 3단계: 가운데 카드 뒤집기
+  setTimeout(()=>{ flipInner.classList.add('flipped'); }, 1050);
+  // 4단계: 질문 카드 등장, 덱 숨기기
   setTimeout(()=>{
-    flipWrap.style.opacity='1';
-    void flipInner.offsetWidth;
-    flipInner.classList.add('q-card-anim');
-    // 날아간 카드 초기화
-    setTimeout(()=>{
-      flyCard.className='deck-card';
-      flyCard.style.opacity='1';
-    }, 300);
-  }, 880);
+    document.getElementById('deck-scene').style.display='none';
+    qCard.style.display='block';
+    qCard.className='q-reveal';
+  }, 1500);
   const myAns=answers.find(a=>a.player_id===myId&&a.stage===stage&&a.question_idx===qi);
   document.getElementById('btn-A').className='cbtn A'+(myAns?.choice==='A'?' pA':'');
   document.getElementById('btn-B').className='cbtn B'+(myAns?.choice==='B'?' pB':'');
