@@ -526,8 +526,13 @@ async function startBoardAnim(stage,players,answers,room){
   const inner=document.getElementById('board-inner');
   inner.innerHTML='';
   const qs=getQs(room)[stage]||[];
-  const N=qs.length;
-  const ROW=130; // taller row to fit question text
+  // 커스텀 Q: stage가 이미 +1 됐으므로 question_idx = stage-1 로 저장돼 있음
+  const cqRaw=room.custom_q?JSON.parse(room.custom_q):null;
+  const cqIdx=stage-1;
+  const hasCQ=!!cqRaw&&answers.some(a=>a.stage===99&&a.question_idx===cqIdx);
+  const allQs=hasCQ?[...qs,{q:cqRaw.q,A:cqRaw.A,B:cqRaw.B,isCQ:true}]:[...qs];
+  const N=allQs.length;
+  const ROW=130;
   const PIECE=34;
   const W=inner.parentElement.offsetWidth||340;
   const totalH=N*ROW+90;
@@ -541,12 +546,13 @@ async function startBoardAnim(stage,players,answers,room){
   inner.appendChild(vline);
 
   // Draw nodes, question text, branch lines, answer labels per question
-  qs.forEach((q,qi)=>{
+  allQs.forEach((q,qi)=>{
     const cy=qi*ROW+20;
+    const isCQ=!!q.isCQ;
     // Question text above node
     const qtxt=document.createElement('div');
-    qtxt.style.cssText=`position:absolute;left:50%;transform:translateX(-50%);top:${cy-2}px;white-space:nowrap;font-size:.7rem;font-weight:800;color:#7B5EA7;background:#fff;padding:3px 10px;border-radius:10px;border:1.5px solid #C8B6E2;z-index:4;max-width:${W*0.82}px;overflow:hidden;text-overflow:ellipsis`;
-    qtxt.textContent=`Q${qi+1}. ${q.q}`;
+    qtxt.style.cssText=`position:absolute;left:50%;transform:translateX(-50%);top:${cy-2}px;white-space:nowrap;font-size:.7rem;font-weight:800;color:${isCQ?'#E05E9B':'#7B5EA7'};background:${isCQ?'#FFF0F8':'#fff'};padding:3px 10px;border-radius:10px;border:1.5px solid ${isCQ?'#F4A8D0':'#C8B6E2'};z-index:4;max-width:${W*0.82}px;overflow:hidden;text-overflow:ellipsis`;
+    qtxt.textContent=isCQ?`🐾 ${q.q}`:`Q${qi+1}. ${q.q}`;
     inner.appendChild(qtxt);
     // Node circle
     const nd=document.createElement('div');
@@ -626,8 +632,11 @@ async function startBoardAnim(stage,players,answers,room){
     await sleep(250);
     // Split pieces
     const aGroup=[],bGroup=[];
+    const isCQNode=allQs[qi]?.isCQ;
     pieceData.forEach(item=>{
-      const ans=answers.find(a=>a.player_id===item.p.id&&a.stage===stage&&a.question_idx===qi);
+      const ans=isCQNode
+        ? answers.find(a=>a.player_id===item.p.id&&a.stage===99&&a.question_idx===cqIdx)
+        : answers.find(a=>a.player_id===item.p.id&&a.stage===stage&&a.question_idx===qi);
       (ans?.choice==='A'?aGroup:bGroup).push(item);
     });
     const branchY=qi*ROW+78;
