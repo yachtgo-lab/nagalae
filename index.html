@@ -42,7 +42,7 @@ input:focus{border-color:#7B5EA7}
 .av-card.tk{opacity:.32;pointer-events:none}
 .av-name{font-size:.6rem;font-weight:700;color:#666;margin-top:3px}
 .cat-wrap{display:flex;align-items:flex-start;gap:10px;background:#F3EEFF;border-radius:20px;padding:14px;width:100%}
-.cat-ico{font-size:2.2rem;flex-shrink:0}
+.cat-ico{font-size:2.2rem;flex-shrink:0;width:2.6rem;height:2.6rem;object-fit:contain}
 .cat-bbl{background:#fff;border-radius:0 16px 16px 16px;padding:12px;font-size:.95rem;font-weight:700;color:#333;line-height:1.5;flex:1;box-shadow:0 2px 8px rgba(0,0,0,.07)}
 .cat-lbl{font-size:.7rem;color:#9DD9D2;font-weight:700;margin-bottom:4px}
 .wmsg{font-size:.85rem;color:#bbb;text-align:center;animation:pulse 1.6s ease-in-out infinite}
@@ -81,7 +81,7 @@ input:focus{border-color:#7B5EA7}
 @keyframes fup{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 .slbl{font-size:.72rem;font-weight:700;color:#aaa;letter-spacing:.07em;width:100%;text-align:left}
 .catend{text-align:center}
-.bigcat{font-size:5rem;display:block;animation:cbnc 1s ease-in-out infinite}
+.bigcat{width:7rem;height:7rem;object-fit:contain;display:block;margin:0 auto;animation:cbnc 1s ease-in-out infinite}
 @keyframes cbnc{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 .prog{display:flex;justify-content:center;gap:6px;width:100%}
 .prog-dot{width:9px;height:9px;border-radius:50%;background:#eee;transition:background .3s}
@@ -175,7 +175,7 @@ input:focus{border-color:#7B5EA7}
       <div class="flip-back" id="flip-back">
         <div class="flip-back-inner">
           <div class="cat-wrap" style="margin-bottom:10px">
-            <div class="cat-ico">🐱</div>
+            <img src="https://raw.githubusercontent.com/yachtgo-lab/nagalae/claude/keen-lamport-p5l3dq/cat.png" class="cat-ico">
             <div class="cat-bbl">
               <div class="cat-lbl">냥~ 질문할게요!</div>
               <div id="q-text"></div>
@@ -204,7 +204,7 @@ input:focus{border-color:#7B5EA7}
 
 <!-- 방장 커스텀 질문 화면 -->
 <div id="s-custom-q" class="screen">
-  <div style="font-size:2rem;margin-bottom:8px">🐱</div>
+  <img src="https://raw.githubusercontent.com/yachtgo-lab/nagalae/claude/keen-lamport-p5l3dq/cat.png" style="width:3rem;height:3rem;object-fit:contain;margin-bottom:8px">
   <h2 style="font-size:1.05rem;font-weight:800;color:#7B5EA7;margin-bottom:6px;word-break:keep-all">로비 직전! 방장 특별 질문</h2>
   <p style="font-size:.82rem;color:#aaa;margin-bottom:20px;word-break:keep-all">질문을 직접 만들거나, 기존 질문 중 하나를 골라요!</p>
   <div id="cq-choice" style="width:100%;display:flex;flex-direction:column;gap:10px">
@@ -225,7 +225,7 @@ input:focus{border-color:#7B5EA7}
 
 <!-- 커스텀 질문 답변 화면 -->
 <div id="s-custom-qa" class="screen">
-  <div style="font-size:2rem;margin-bottom:6px">🐾</div>
+  <img src="https://raw.githubusercontent.com/yachtgo-lab/nagalae/claude/keen-lamport-p5l3dq/cat.png" style="width:3rem;height:3rem;object-fit:contain;margin-bottom:6px">
   <div style="background:#F3EEFF;border-radius:16px;padding:14px 16px;margin-bottom:20px;font-size:.82rem;color:#9B7FD4;font-weight:700">냥~ 방장 특별 질문!</div>
   <h2 id="cqa-q" style="font-size:1rem;font-weight:800;color:#5D3A8E;margin-bottom:20px;word-break:keep-all"></h2>
   <div id="cqa-btns" style="width:100%;display:flex;flex-direction:column;gap:12px"></div>
@@ -235,7 +235,7 @@ input:focus{border-color:#7B5EA7}
 
 <!-- 커스텀 질문 결과 화면 -->
 <div id="s-custom-rev" class="screen">
-  <div style="font-size:1.6rem;margin-bottom:4px">🐱✨</div>
+  <img src="https://raw.githubusercontent.com/yachtgo-lab/nagalae/claude/keen-lamport-p5l3dq/cat.png" style="width:3rem;height:3rem;object-fit:contain;margin-bottom:4px">
   <div style="background:#F3EEFF;border-radius:16px;padding:10px 14px;margin-bottom:12px;font-size:.8rem;color:#9B7FD4;font-weight:700">방장 특별 질문 결과!</div>
   <h2 id="crev-q" style="font-size:.95rem;font-weight:800;color:#5D3A8E;margin-bottom:14px;word-break:keep-all"></h2>
   <div id="crev-list" style="width:100%"></div>
@@ -264,7 +264,7 @@ input:focus{border-color:#7B5EA7}
 <!-- 최종 선택 -->
 <div id="s-final" class="screen">
   <div class="cat-wrap">
-    <div class="cat-ico">🐱</div>
+    <img src="https://raw.githubusercontent.com/yachtgo-lab/nagalae/claude/keen-lamport-p5l3dq/cat.png" class="cat-ico">
     <div class="cat-bbl">
       <div class="cat-lbl">냥~ 마지막 선택!</div>
       함께 성을 탈출하고 싶은 공주를<br>딱 한 명 선택하세요 💌<br>
@@ -285,6 +285,7 @@ input:focus{border-color:#7B5EA7}
 
 </div>
 <script>
+const CAT_IMG='https://raw.githubusercontent.com/yachtgo-lab/nagalae/claude/keen-lamport-p5l3dq/cat.png';
 const SB_URL='https://gdbycodzgooqacukxwjl.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkYnljb2R6Z29vcWFjdWt4d2psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMDA5OTYsImV4cCI6MjA5Nzg3Njk5Nn0.pyxwi2cMK1tfEEdRi5jJ1mqUCKKhpJh1XPsM3Z5MeHc';
 const sb=supabase.createClient(SB_URL,SB_KEY);
@@ -916,7 +917,7 @@ function renderFinal(room,players,finals){
   // Cat option
   const catPicked=myF?.target_id==='__cat__';
   html+=`<button onclick="submitFinal('__cat__')" style="width:100%;padding:14px;border:3px solid ${catPicked?'#9DD9D2':'#eee'};border-radius:16px;background:${catPicked?'#EDFAF8':'#fff'};cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s${myF?';pointer-events:none':''}">
-    <span style="font-size:2.2rem">🐱</span>
+    <img src="${CAT_IMG}" style="width:2.6rem;height:2.6rem;object-fit:contain">
     <div style="text-align:left">
       <div style="font-weight:700;color:#5BBFB5;font-size:1rem">나갈래 고양이</div>
       <div style="font-size:.72rem;color:#aaa">혼자서 고양이 문으로!</div>
@@ -959,7 +960,7 @@ function renderEnd(players,finals){
   if(myChoice==='__cat__'){
     // Chose cat intentionally
     html=`<div class="catend" style="margin-bottom:14px">
-      <span class="bigcat">🐱</span>
+      <img src="${CAT_IMG}" class="bigcat">
       <div style="font-size:1.1rem;font-weight:900;color:#5BBFB5;margin:14px 0 8px">고양이 문 선택!</div>
       <div style="background:#EDFAF8;border-radius:18px;padding:16px;margin-bottom:10px;border:2px solid #9DD9D2">
         <p style="color:#555;font-size:.88rem;line-height:1.8;word-break:keep-all">
@@ -983,7 +984,7 @@ function renderEnd(players,finals){
     </div>`;
   } else {
     html=`<div class="catend" style="margin-bottom:14px">
-      <span class="bigcat">🐱</span>
+      <img src="${CAT_IMG}" class="bigcat">
       <div style="font-size:1.1rem;font-weight:900;color:#7B5EA7;margin:14px 0 8px">나갈래 고양이가 반겨요!</div>
       <div style="background:#F3EEFF;border-radius:18px;padding:16px;margin-bottom:10px">
         <p style="color:#555;font-size:.88rem;line-height:1.8;word-break:keep-all">
