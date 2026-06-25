@@ -212,6 +212,17 @@ input:focus{border-color:#7B5EA7}
   <div id="cqa-prog" style="margin-top:16px;font-size:.8rem;color:#aaa"></div>
 </div>
 
+<!-- 커스텀 질문 결과 화면 -->
+<div id="s-custom-rev" class="screen">
+  <div style="font-size:1.6rem;margin-bottom:4px">🐱✨</div>
+  <div style="background:#F3EEFF;border-radius:16px;padding:10px 14px;margin-bottom:12px;font-size:.8rem;color:#9B7FD4;font-weight:700">방장 특별 질문 결과!</div>
+  <h2 id="crev-q" style="font-size:.95rem;font-weight:800;color:#5D3A8E;margin-bottom:14px;word-break:keep-all"></h2>
+  <div id="crev-list" style="width:100%"></div>
+  <button id="btn-crev-next" class="btn btn-pri" onclick="hostAfterCustomRev()" style="display:none;margin-top:8px">로비로 이동 🏃</button>
+  <button id="btn-crev-fin" class="btn btn-rose" onclick="hostAfterCustomRevFinal()" style="display:none;margin-top:8px">최종 선택으로 💌</button>
+  <p class="wmsg" id="crev-wait" style="display:none">호스트가 진행합니다…</p>
+</div>
+
 <!-- 로비 (보드 애니메이션) -->
 <div id="s-lobby" class="screen">
   <div style="text-align:center;width:100%">
@@ -426,6 +437,7 @@ async function syncAndRender(){
   else if(s==='reveal')renderRev(room,players,answers);
   else if(s==='making_custom_q')renderMakingCustomQ(room);
   else if(s==='answering_custom_q')renderAnsweringCustomQ(room,players,answers);
+  else if(s==='revealing_custom_q')renderRevealCustomQ(room,players,answers);
   else if(s==='final')renderFinal(room,players,finals);
   else if(s==='ended')renderEnd(players,finals);
 }
@@ -574,7 +586,8 @@ async function startBoardAnim(stage,players,answers,room){
 
   // Animate
   await sleep(300);
-  // Fade in at first node
+  // Fade in at first node — RAF ensures transition fires after initial render
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
   pieceData.forEach(({el},i)=>{
     const offset=(i-(n-1)/2)*(PIECE+4);
     el.style.opacity='1';
@@ -770,21 +783,38 @@ function renderAnsweringCustomQ(room,players,answers){
   document.getElementById('cqa-done').style.display=myAns?'block':'none';
   const doneCount=players.filter(p=>answers.some(a=>a.player_id===p.id&&a.stage===99&&a.question_idx===cqIdx)).length;
   document.getElementById('cqa-prog').textContent=`${doneCount}/${players.length}명 답변 완료`;
-  // 전원 답변 시 다음 단계로
+  // 전원 답변 시 reveal로 이동
   if(doneCount===players.length&&players.length>0){
-    sb.from('rooms').select('stage').eq('id',roomId).single().then(({data:r})=>{
-      if(!r)return;
-      // 어디로 가야 하는지 custom_q에 dest 저장 안 했으니 stage 기준으로 판단
-      // stage >= STAGE_INTRO.length-1 이면 final, 아니면 lobby
-      const destFinal=r.stage>=(STAGE_INTRO.length-1);
-      if(destFinal){
-        sb.from('rooms').update({status:'final'}).eq('id',roomId).eq('status','answering_custom_q').then(()=>{});
-      } else {
-        boardAnimRunning=false;
-        sb.from('rooms').update({status:'lobby',stage:r.stage+1,question_idx:0}).eq('id',roomId).eq('status','answering_custom_q').then(()=>{});
-      }
-    });
+    sb.from('rooms').update({status:'revealing_custom_q'}).eq('id',roomId).eq('status','answering_custom_q').then(()=>{});
   }
+}
+function renderRevealCustomQ(room,players,answers){
+  show('s-custom-rev');
+  const cq=room.custom_q?JSON.parse(room.custom_q):{q:'?',A:'A',B:'B'};
+  const cqIdx=room.stage;
+  document.getElementById('crev-q').textContent=cq.q;
+  document.getElementById('crev-list').innerHTML=answers
+    .filter(a=>a.stage===99&&a.question_idx===cqIdx)
+    .map(a=>{
+      const p=players.find(pl=>pl.id===a.player_id)||{};
+      return `<div class="rrow">
+        ${avSVG(p.char_id)}
+        <span style="font-weight:700;color:#7B5EA7">${esc(p.name)}</span>
+        <span style="flex:1;text-align:right;font-size:.82rem;background:${a.choice==='A'?'#FFB5A7':'#9DD9D2'};color:#fff;padding:4px 12px;border-radius:10px;word-break:keep-all">
+          ${esc(a.choice==='A'?cq.A:cq.B)}</span></div>`;
+    }).join('');
+  const destFinal=room.stage>=(STAGE_INTRO.length-1);
+  document.getElementById('btn-crev-next').style.display=isHost&&!destFinal?'block':'none';
+  document.getElementById('btn-crev-fin').style.display=isHost&&destFinal?'block':'none';
+  document.getElementById('crev-wait').style.display=isHost?'none':'block';
+}
+async function hostAfterCustomRev(){
+  const {data:room}=await sb.from('rooms').select('stage').eq('id',roomId).single();
+  boardAnimRunning=false;
+  await sb.from('rooms').update({status:'lobby',stage:room.stage+1,question_idx:0}).eq('id',roomId);
+}
+async function hostAfterCustomRevFinal(){
+  await sb.from('rooms').update({status:'final'}).eq('id',roomId);
 }
 async function submitCQAnswer(choice,cqIdx){
   if(_cqAnswered)return;
