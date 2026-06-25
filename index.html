@@ -48,6 +48,16 @@ input:focus{border-color:#7B5EA7}
 .wmsg{font-size:.85rem;color:#bbb;text-align:center;animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 .qcnt{font-size:.78rem;color:#aaa;text-align:center}
+
+/* 카드덱 애니메이션 */
+.deck-wrap{position:relative;width:100%;height:54px;margin-bottom:6px;display:flex;justify-content:center;align-items:center}
+.deck-card{position:absolute;width:44px;height:60px;border-radius:10px;background:linear-gradient(135deg,#C8B6E2,#9B7FD4);border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:1.4rem;transform-origin:bottom center}
+@keyframes deckFan{0%{transform:rotate(0deg) translateY(0)}40%{transform:rotate(var(--r)) translateY(-6px)}70%{transform:rotate(var(--r)) translateY(-6px)}100%{transform:rotate(0deg) translateY(0)}}
+@keyframes cardDeal{0%{transform:scale(1) translateY(0);opacity:1}30%{transform:scale(1.18) translateY(-22px);opacity:1}60%{transform:scale(1.12) translateY(-18px);opacity:1}100%{transform:scale(1) translateY(0);opacity:0}}
+.deck-card.fan{animation:deckFan .6s ease-in-out forwards}
+.deck-card.deal{animation:cardDeal .55s ease-in-out forwards}
+@keyframes qCardIn{0%{opacity:0;transform:translateY(-30px) scale(.9) rotateX(20deg)}60%{transform:translateY(4px) scale(1.02) rotateX(-3deg)}100%{opacity:1;transform:translateY(0) scale(1) rotateX(0)}}
+.q-card-anim{animation:qCardIn .45s cubic-bezier(.22,1,.36,1) forwards}
 .intro-card{background:linear-gradient(160deg,#1a1035 0%,#2d1b69 60%,#1a1035 100%);border-radius:26px;padding:26px;width:100%;text-align:center;color:#fff;position:relative;overflow:hidden}
 .intro-card::before{content:'✦';position:absolute;font-size:8rem;opacity:.05;top:-20px;left:50%;transform:translateX(-50%)}
 .rrow{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:#f9f5ff;margin-bottom:7px}
@@ -137,7 +147,15 @@ input:focus{border-color:#7B5EA7}
 <div id="s-q" class="screen">
   <div class="prog" id="q-prog"></div>
   <div class="qcnt" id="q-cnt"></div>
-  <div class="cat-wrap">
+  <!-- 카드덱 -->
+  <div class="deck-wrap" id="deck-wrap">
+    <div class="deck-card" style="--r:-18deg;z-index:1">🂠</div>
+    <div class="deck-card" style="--r:-8deg;z-index:2">🂠</div>
+    <div class="deck-card" style="--r:0deg;z-index:3">🂠</div>
+    <div class="deck-card" style="--r:8deg;z-index:4">🂠</div>
+    <div class="deck-card" style="--r:18deg;z-index:5">🂠</div>
+  </div>
+  <div class="cat-wrap q-card-anim" id="q-card">
     <div class="cat-ico">🐱</div>
     <div class="cat-bbl">
       <div class="cat-lbl">냥~ 질문할게요!</div>
@@ -609,6 +627,25 @@ function renderQ(room,players,answers){
   document.getElementById('q-text').textContent=q.q;
   document.getElementById('btn-A').textContent=`A.  ${q.A}`;
   document.getElementById('btn-B').textContent=`B.  ${q.B}`;
+  // 카드덱 뽑기 애니메이션
+  const cards=[...document.querySelectorAll('#deck-wrap .deck-card')];
+  const qCard=document.getElementById('q-card');
+  cards.forEach(c=>{c.className='deck-card';void c.offsetWidth;});
+  qCard.style.opacity='0';
+  cards.forEach((c,i)=>{
+    c.style.animationDelay=`${i*60}ms`;
+    c.classList.add('fan');
+  });
+  // 마지막 카드 딜 → 질문카드 등장
+  const last=cards[Math.floor(cards.length/2)];
+  last.addEventListener('animationend',()=>{
+    last.classList.add('deal');
+    setTimeout(()=>{
+      qCard.className='cat-wrap q-card-anim';
+      void qCard.offsetWidth;
+      qCard.style.opacity='';
+    },200);
+  },{once:true});
   const myAns=answers.find(a=>a.player_id===myId&&a.stage===stage&&a.question_idx===qi);
   document.getElementById('btn-A').className='cbtn A'+(myAns?.choice==='A'?' pA':'');
   document.getElementById('btn-B').className='cbtn B'+(myAns?.choice==='B'?' pB':'');
