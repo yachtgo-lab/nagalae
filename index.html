@@ -647,11 +647,18 @@ async function hostStartStage(){
 }
 
 // ─── Question ────────────────────────────────────────────────────
+let _lastQKey='';
 function renderQ(room,players,answers){
   show('s-q');
   boardAnimRunning=false;
-  document.getElementById('deck-scene').style.display='';
   const stage=room.stage,qi=room.question_idx;
+  const qKey=`${stage}-${qi}`;
+  const isNewQ=(qKey!==_lastQKey);
+  _lastQKey=qKey;
+  if(isNewQ){
+    document.getElementById('deck-scene').style.display='';
+    document.getElementById('q-card').style.display='none';
+  }
   const qs=getQs(room)[stage]||[];
   const q=qs[qi];if(!q)return;
   document.getElementById('q-prog').innerHTML=progHTML(stage,qi);
@@ -659,7 +666,23 @@ function renderQ(room,players,answers){
   document.getElementById('q-text').textContent=q.q;
   document.getElementById('btn-A').textContent=`A.  ${q.A}`;
   document.getElementById('btn-B').textContent=`B.  ${q.B}`;
-  // ── 카드덱 애니메이션 ──
+  // ── 카드덱 애니메이션 (새 질문일 때만) ──
+  if(!isNewQ){
+    // 이미 보고 있는 질문 — 버튼 상태만 업데이트
+    const myAns=answers.find(a=>a.player_id===myId&&a.stage===stage&&a.question_idx===qi);
+    document.getElementById('btn-A').className='cbtn A'+(myAns?.choice==='A'?' pA':'');
+    document.getElementById('btn-B').className='cbtn B'+(myAns?.choice==='B'?' pB':'');
+    document.getElementById('q-wait').style.display=myAns?'block':'none';
+    document.getElementById('q-sbar').innerHTML=players.map(p=>{
+      const done=answers.some(a=>a.player_id===p.id&&a.stage===stage&&a.question_idx===qi);
+      return `<div class="chip" style="background:${done?'#EEE8FA':'#f5f5f5'};color:${done?'#7B5EA7':'#bbb'}">${avSVG(p.char_id)}<span>${esc(p.name)} ${done?'✓':'…'}</span></div>`;
+    }).join('');
+    const allDone=players.every(p=>answers.some(a=>a.player_id===p.id&&a.stage===stage&&a.question_idx===qi));
+    if(allDone&&answers.find(a=>a.player_id===myId&&a.stage===stage&&a.question_idx===qi))
+      sb.from('rooms').update({status:'reveal'}).eq('id',roomId).eq('status','question').then(()=>{});
+    return;
+  }
+  // ── 새 질문 애니메이션 ──
   // 팬 위치: [각도, x오프셋]
   const fanPos=[[-30,-80],[-15,-42],[15,42],[30,80]];
   const bgCards=['dc0','dc1','dc3','dc4'].map(id=>document.getElementById(id));
