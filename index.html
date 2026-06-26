@@ -338,8 +338,8 @@ input:focus{border-color:#7B5EA7}
       <div id="hidden-q-text" style="font-size:1rem;font-weight:900;color:#5B2D7E;line-height:1.5;word-break:keep-all">마음에 드는 사람이 생기면</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;width:100%">
-      <button class="btn" id="hidden-btn-a" style="background:linear-gradient(135deg,#FF6B9D,#FF8E8E);border:none;font-size:.95rem" onclick="submitHiddenAnswer('A')">❤️ 표현하는 편이다</button>
-      <button class="btn" id="hidden-btn-b" style="background:linear-gradient(135deg,#6B9DFF,#8EC5FF);border:none;font-size:.95rem" onclick="submitHiddenAnswer('B')">💙 천천히 알아가는 편이다</button>
+      <button class="btn" id="hidden-btn-a" style="background:linear-gradient(135deg,#FF6B9D,#FF8E8E);border:none;font-size:.95rem" onclick="submitHiddenAnswer('A')">A. 표현하는 편이다</button>
+      <button class="btn" id="hidden-btn-b" style="background:linear-gradient(135deg,#6B9DFF,#8EC5FF);border:none;font-size:.95rem" onclick="submitHiddenAnswer('B')">B. 천천히 알아가는 편이다</button>
     </div>
     <div id="hidden-answered-msg" style="display:none;text-align:center;padding:20px;background:#F3EEFF;border-radius:16px;margin-top:10px">
       <div style="font-size:1.5rem;margin-bottom:6px">✅</div>
@@ -1252,8 +1252,8 @@ function renderHiddenQ(room,players,finals,answers){
 
   // Update question text & buttons
   document.getElementById('hidden-q-text').textContent=hq.q;
-  document.getElementById('hidden-btn-a').textContent=hq.A;
-  document.getElementById('hidden-btn-b').textContent=hq.B;
+  document.getElementById('hidden-btn-a').textContent='A. '+hq.A.replace(/^❤️\s*/,'');
+  document.getElementById('hidden-btn-b').textContent='B. '+hq.B.replace(/^💙\s*/,'');
 
   const progressTxt=`${answeredCount}/${coupleCount}명 답변 완료`;
 
@@ -1264,7 +1264,7 @@ function renderHiddenQ(room,players,finals,answers){
   if(emojiBadgeEl){
     if(myEmoji&&myCouple){
       const partnerEmoji=myCouple.pA===myId?myCouple.eB:myCouple.eA;
-      emojiBadgeEl.innerHTML=`<span style="font-size:1.4rem">${myEmoji}</span><span style="font-size:1rem">${myCouple.heart}</span><span style="font-size:1.4rem">${partnerEmoji}</span><span style="font-size:.72rem;color:#E05E9B;font-weight:700;margin-left:6px">← 나는 왼쪽 이모지!</span>`;
+      emojiBadgeEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;justify-content:center"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:1.6rem">${myEmoji}</span><span style="font-size:.62rem;font-weight:800;color:#E05E9B;background:#FFD6EC;border-radius:6px;padding:1px 6px">나</span></div><span style="font-size:1.1rem">${myCouple.heart}</span><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:1.6rem">${partnerEmoji}</span><span style="font-size:.62rem;font-weight:800;color:#aaa;background:#f0f0f0;border-radius:6px;padding:1px 6px">?</span></div></div>`;
       emojiBadgeEl.style.display='flex';
     } else {
       emojiBadgeEl.style.display='none';
