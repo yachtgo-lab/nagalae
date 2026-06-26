@@ -1264,7 +1264,7 @@ function renderHiddenQ(room,players,finals,answers){
   if(emojiBadgeEl){
     if(myEmoji&&myCouple){
       const partnerEmoji=myCouple.pA===myId?myCouple.eB:myCouple.eA;
-      emojiBadgeEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;justify-content:center"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:1.6rem">${myEmoji}</span><span style="font-size:.62rem;font-weight:800;color:#E05E9B;background:#FFD6EC;border-radius:6px;padding:1px 6px">나</span></div><span style="font-size:1.1rem">${myCouple.heart}</span><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:1.6rem">${partnerEmoji}</span><span style="font-size:.62rem;font-weight:800;color:#aaa;background:#f0f0f0;border-radius:6px;padding:1px 6px">?</span></div></div>`;
+      emojiBadgeEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;justify-content:center"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:1.6rem">${myEmoji}</span><span style="font-size:.62rem;font-weight:800;color:#E05E9B;background:#FFD6EC;border-radius:6px;padding:1px 6px">나</span></div><span style="font-size:1.1rem">${myCouple.heart}</span><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:1.6rem">${partnerEmoji}</span><span style="font-size:.62rem;font-weight:800;color:#7B5EA7;background:#EEE8FA;border-radius:6px;padding:1px 6px">상대</span></div></div>`;
       emojiBadgeEl.style.display='flex';
     } else {
       emojiBadgeEl.style.display='none';
