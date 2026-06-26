@@ -372,7 +372,7 @@ input:focus{border-color:#7B5EA7}
     </div>
   </div>
   <!-- 실시간 미니 보드 (답변 완료 후 표시) -->
-  <div id="hidden-mini-board" style="display:none;width:100%;margin-top:12px;border-radius:20px;background:linear-gradient(180deg,#FFF0F8 0%,#F3EEFF 60%,#EEF4FF 100%);border:2px solid #F4A8D0;overflow:hidden">
+  <div id="hidden-mini-board" style="display:none;width:100%;margin-top:12px;border-radius:20px;background:linear-gradient(180deg,#1a0933 0%,#2d1057 60%,#1a1a3e 100%);border:2px solid #7B3FA0;overflow:hidden">
     <div style="text-align:center;padding:8px 0 4px;font-size:.68rem;font-weight:700;color:#E05E9B;letter-spacing:.1em">✦ 선택 결과 ✦</div>
     <div id="hidden-mini-board-inner" style="position:relative;width:100%"></div>
   </div>
@@ -1383,8 +1383,8 @@ function renderHiddenRev(room,players,finals,answers){
   // Couple guide
   const myCouple=coupleEmojis.find(c=>c.pA===myId||c.pB===myId);
   const myEmoji=hiddenEmojis[myId];
-  let html=`<div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:18px;padding:14px 16px;border:2px solid #F4A8D0;margin-bottom:14px">
-    <div style="font-size:.72rem;font-weight:700;color:#E05E9B;margin-bottom:10px;letter-spacing:.08em">💌 커플 안내</div>
+  let html=`<div style="background:linear-gradient(135deg,#1a0933,#2d1057);border-radius:18px;padding:14px 16px;border:2px solid #7B3FA0;margin-bottom:14px">
+    <div style="font-size:.72rem;font-weight:700;color:#D4A0FF;margin-bottom:10px;letter-spacing:.08em">💌 커플 안내</div>
     <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">`;
   coupleEmojis.forEach(c=>{
     const isMeA=c.pA===myId, isMeB=c.pB===myId;
@@ -1394,13 +1394,13 @@ function renderHiddenRev(room,players,finals,answers){
   html+=`</div>`;
   if(myEmoji&&myCouple){
     const partnerEmoji=myCouple.pA===myId?myCouple.eB:myCouple.eA;
-    html+=`<div style="margin-top:10px;text-align:center;font-size:.78rem;color:#E05E9B;font-weight:700">나는 <span style="font-size:1.1rem">${myEmoji}</span> 이에요!</div>`;
+    html+=`<div style="margin-top:10px;text-align:center;font-size:.78rem;color:#D4A0FF;font-weight:700">나는 <span style="font-size:1.1rem">${myEmoji}</span> 이에요!</div>`;
   }
   html+=`</div>`;
 
   // Board wrap for animation
-  html+=`<div id="hidden-board-wrap" style="border-radius:20px;background:linear-gradient(180deg,#FFF0F8 0%,#F3EEFF 60%,#EEF4FF 100%);border:2px solid #F4A8D0;overflow:visible;position:relative">
-    <div style="text-align:center;padding:8px 0;font-size:.7rem;font-weight:700;color:#E05E9B;letter-spacing:.1em">✦ HIDDEN STAGE ✦</div>
+  html+=`<div id="hidden-board-wrap" style="border-radius:20px;background:linear-gradient(180deg,#1a0933 0%,#2d1057 60%,#1a1a3e 100%);border:2px solid #7B3FA0;overflow:visible;position:relative">
+    <div style="text-align:center;padding:8px 0;font-size:.7rem;font-weight:700;color:#D4A0FF;letter-spacing:.1em">✦ HIDDEN STAGE ✦</div>
     <div id="hidden-board-inner" style="position:relative;width:100%"></div>
   </div>`;
 
@@ -1430,7 +1430,7 @@ async function runHiddenMiniBoard(hq,qi,coupledPlayers,answers,hiddenEmojis,coup
   // Node
   const nd=document.createElement('div');
   nd.className='bnode';
-  nd.style.cssText=`width:36px;height:36px;top:20px;border-color:#F4A8D0;color:#E05E9B`;
+  nd.style.cssText=`width:36px;height:36px;top:20px;border-color:#9B6FD0;color:#D4A0FF;background:#2d1057`;
   nd.textContent='Q';
   inner.appendChild(nd);
 
@@ -1459,7 +1459,7 @@ async function runHiddenMiniBoard(hq,qi,coupledPlayers,answers,hiddenEmojis,coup
     const emoji=hiddenEmojis[p.id]||'?';
     const el=document.createElement('div');
     el.style.cssText=`position:absolute;width:${PIECE}px;height:${PIECE+14}px;opacity:0;top:-50px;left:${W/2-PIECE/2}px;display:flex;flex-direction:column;align-items:center;gap:1px;transition:left .5s ease,top .5s ease,opacity .4s;z-index:5`;
-    el.innerHTML=`<div style="width:${PIECE}px;height:${PIECE}px;border-radius:50%;background:#FFF0F8;border:2px solid #F4A8D0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 8px rgba(244,168,208,.4)">${emoji}</div><div style="font-size:.48rem;font-weight:800;color:#E05E9B;background:rgba(255,255,255,.9);border-radius:6px;padding:1px 4px">?</div>`;
+    el.innerHTML=`<div style="width:${PIECE}px;height:${PIECE}px;border-radius:50%;background:#3d1a6e;border:2px solid #9B6FD0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 12px rgba(155,111,208,.5)">${emoji}</div><div style="font-size:.48rem;font-weight:800;color:#D4A0FF;background:rgba(45,16,87,.9);border-radius:6px;padding:1px 4px">?</div>`;
     inner.appendChild(el);
     return{el,p};
   });
@@ -1516,12 +1516,12 @@ async function startHiddenBoardAnim(history,coupledPlayers,answers,hiddenEmojis,
   history.forEach((entry,qi)=>{
     const cy=qi*ROW+20;
     const qtxt=document.createElement('div');
-    qtxt.style.cssText=`position:absolute;left:50%;transform:translateX(-50%);top:${cy-2}px;white-space:nowrap;font-size:.68rem;font-weight:800;color:#E05E9B;background:#fff;padding:3px 10px;border-radius:10px;border:1.5px solid #F4A8D0;z-index:4;max-width:${W*0.82}px;overflow:hidden;text-overflow:ellipsis`;
+    qtxt.style.cssText=`position:absolute;left:50%;transform:translateX(-50%);top:${cy-2}px;white-space:nowrap;font-size:.68rem;font-weight:800;color:#D4A0FF;background:#2d1057;padding:3px 10px;border-radius:10px;border:1.5px solid #9B6FD0;z-index:4;max-width:${W*0.82}px;overflow:hidden;text-overflow:ellipsis`;
     qtxt.textContent=`Q${entry.qi}. ${entry.q}`;
     inner.appendChild(qtxt);
     const nd=document.createElement('div');
     nd.className='bnode';
-    nd.style.cssText=`width:36px;height:36px;top:${cy+22}px;border-color:#F4A8D0;color:#E05E9B`;
+    nd.style.cssText=`width:36px;height:36px;top:${cy+22}px;border-color:#9B6FD0;color:#D4A0FF;background:#2d1057`;
     nd.textContent=`${entry.qi}`;
     inner.appendChild(nd);
     const branchY=cy+58,branchH=ROW-58;
@@ -1548,7 +1548,7 @@ async function startHiddenBoardAnim(history,coupledPlayers,answers,hiddenEmojis,
   const lobbyEl=document.createElement('div');
   lobbyEl.className='blobby';
   lobbyEl.style.cssText=`top:${N*ROW+20}px;font-size:1.2rem`;
-  lobbyEl.innerHTML='<div style="background:#fff;border-radius:16px;padding:6px 16px;border:2px solid #F4A8D0;font-size:.75rem;font-weight:800;color:#E05E9B">💫 END</div>';
+  lobbyEl.innerHTML='<div style="background:#2d1057;border-radius:16px;padding:6px 16px;border:2px solid #9B6FD0;font-size:.75rem;font-weight:800;color:#D4A0FF">💫 END</div>';
   inner.appendChild(lobbyEl);
 
   // Emoji pieces
@@ -1557,7 +1557,7 @@ async function startHiddenBoardAnim(history,coupledPlayers,answers,hiddenEmojis,
     const emoji=hiddenEmojis[p.id]||'?';
     const el=document.createElement('div');
     el.style.cssText=`position:absolute;width:${PIECE}px;height:${PIECE+14}px;opacity:0;top:-50px;left:${W/2-PIECE/2}px;display:flex;flex-direction:column;align-items:center;gap:1px;transition:left .5s ease,top .5s ease,opacity .4s;z-index:5`;
-    el.innerHTML=`<div style="width:${PIECE}px;height:${PIECE}px;border-radius:50%;background:#FFF0F8;border:2px solid #F4A8D0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 8px rgba(244,168,208,.4)">${emoji}</div><div style="font-size:.48rem;font-weight:800;color:#E05E9B;background:rgba(255,255,255,.9);border-radius:6px;padding:1px 4px">?</div>`;
+    el.innerHTML=`<div style="width:${PIECE}px;height:${PIECE}px;border-radius:50%;background:#3d1a6e;border:2px solid #9B6FD0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 12px rgba(155,111,208,.6)">${emoji}</div><div style="font-size:.48rem;font-weight:800;color:#D4A0FF;background:rgba(45,16,87,.9);border-radius:6px;padding:1px 4px">?</div>`;
     inner.appendChild(el);
     return{el,p};
   });
