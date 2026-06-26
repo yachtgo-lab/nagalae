@@ -900,9 +900,14 @@ function renderRev(room,players,answers){
   document.getElementById('btn-fin').style.display=isHost&&isLastQ&&isLastStage?'block':'none';
   document.getElementById('rev-wait').style.display=isHost?'none':'block';
 }
+let _hostNextQBusy=false;
 async function hostNextQ(){
-  const {data:room}=await sb.from('rooms').select('question_idx').eq('id',roomId).single();
-  await sb.from('rooms').update({status:'question',question_idx:room.question_idx+1}).eq('id',roomId);
+  if(_hostNextQBusy)return;
+  _hostNextQBusy=true;
+  try{
+    const {data:room}=await sb.from('rooms').select('question_idx').eq('id',roomId).single();
+    await sb.from('rooms').update({status:'question',question_idx:room.question_idx+1}).eq('id',roomId);
+  }finally{_hostNextQBusy=false;}
 }
 async function hostNextStage(){
   boardAnimRunning=false;
@@ -1190,7 +1195,10 @@ async function submitHiddenAnswer(choice){
   await sb.from('answers').upsert({room_id:roomId,player_id:myId,stage:98,question_idx:qi,choice},{onConflict:'room_id,player_id,stage,question_idx'});
 }
 
+let _hostHiddenRandomBusy=false;
 async function hostHiddenRandom(){
+  if(_hostHiddenRandomBusy)return;
+  _hostHiddenRandomBusy=true;
   const {data:room}=await sb.from('rooms').select('question_idx,custom_q').eq('id',roomId).single();
   const nextQi=(room.question_idx||1)+1;
   const cq=getHiddenCQ(room);
@@ -1202,6 +1210,7 @@ async function hostHiddenRandom(){
   const entry={qi:nextQi,q:hq.q,A:hq.A,B:hq.B};
   const newCQ={...cq,hiddenHistory:[...(cq.hiddenHistory||[]),entry],usedHiddenIdx:[...used,picked]};
   await sb.from('rooms').update({question_idx:nextQi,custom_q:JSON.stringify(newCQ)}).eq('id',roomId);
+  _hostHiddenRandomBusy=false;
 }
 
 function hostHiddenCustom(){
@@ -1339,7 +1348,7 @@ function renderHiddenRev(room,players,finals,answers){
   html+=`</div>`;
 
   // Board wrap for animation
-  html+=`<div id="hidden-board-wrap" style="border-radius:20px;background:linear-gradient(180deg,#FFF0F8 0%,#F3EEFF 60%,#EEF4FF 100%);border:2px solid #F4A8D0;overflow:hidden;position:relative">
+  html+=`<div id="hidden-board-wrap" style="border-radius:20px;background:linear-gradient(180deg,#FFF0F8 0%,#F3EEFF 60%,#EEF4FF 100%);border:2px solid #F4A8D0;overflow:visible;position:relative">
     <div style="text-align:center;padding:8px 0;font-size:.7rem;font-weight:700;color:#E05E9B;letter-spacing:.1em">✦ HIDDEN STAGE ✦</div>
     <div id="hidden-board-inner" style="position:relative;width:100%"></div>
   </div>`;
@@ -1442,7 +1451,7 @@ async function startHiddenBoardAnim(history,coupledPlayers,answers,hiddenEmojis,
   const ROW=130;
   const PIECE=36;
   const W=inner.parentElement.offsetWidth||340;
-  const totalH=N*ROW+80;
+  const totalH=N*ROW+130;
   inner.style.height=totalH+'px';
   inner.style.position='relative';
 
