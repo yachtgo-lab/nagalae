@@ -1353,7 +1353,9 @@ function renderHiddenRev(room,players,finals,answers){
     <div style="font-size:.72rem;font-weight:700;color:#E05E9B;margin-bottom:10px;letter-spacing:.08em">💌 커플 안내</div>
     <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">`;
   coupleEmojis.forEach(c=>{
-    html+=`<div style="font-size:1.5rem;letter-spacing:2px">${c.eA}${c.heart}${c.eB}</div>`;
+    const isMeA=c.pA===myId, isMeB=c.pB===myId;
+    const left=isMeB?c.eB:c.eA, right=isMeB?c.eA:c.eB;
+    html+=`<div style="font-size:1.5rem;letter-spacing:2px">${left}${c.heart}${right}</div>`;
   });
   html+=`</div>`;
   if(myEmoji&&myCouple){
