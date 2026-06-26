@@ -281,9 +281,39 @@ input:focus{border-color:#7B5EA7}
   <h2>🔮 운명의 문</h2>
   <div id="end-content" style="width:100%"></div>
   <div id="hidden-stage-btn-wrap" style="display:none;margin-bottom:10px">
-    <button class="btn btn-gold" onclick="startHiddenStage()">✨ 히든 스테이지 시작!</button>
+    <button class="btn btn-gold" onclick="triggerHiddenConsent()">✨ 히든 스테이지 시작!</button>
   </div>
   <button class="btn btn-sec" onclick="location.reload()">다시 모험하기 🔄</button>
+</div>
+
+<!-- 히든 스테이지 동의 -->
+<div id="s-hidden-consent" class="screen">
+  <div style="font-size:.65rem;letter-spacing:.2em;color:#C8B6E2;font-weight:700;margin-bottom:6px">✦ HIDDEN STAGE ✦</div>
+  <h2 style="font-size:1.05rem;margin-bottom:14px">💫 히든 스테이지</h2>
+  <div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:20px;padding:18px;margin-bottom:16px;border:2px solid #F4A8D0;text-align:left">
+    <div style="font-size:.8rem;font-weight:900;color:#E05E9B;margin-bottom:10px">이런 스테이지예요 💕</div>
+    <ul style="margin:0;padding-left:18px;font-size:.8rem;color:#555;line-height:2;word-break:keep-all">
+      <li>커플로 매칭된 분들만 답변해요</li>
+      <li>이름 대신 <b>랜덤 이모지</b>로 표시돼요</li>
+      <li>서로 누가 어떤 이모지인지 몰라요 👀</li>
+      <li>연애 스타일에 관한 은밀한 질문들이에요</li>
+      <li>방장이 질문을 계속 추가할 수 있어요</li>
+    </ul>
+  </div>
+  <div id="hc-couple-wrap" style="display:none;width:100%">
+    <div style="font-size:.78rem;color:#888;text-align:center;margin-bottom:12px">참여에 동의하시나요?</div>
+    <div style="display:flex;gap:10px;width:100%">
+      <button class="btn" style="flex:1;background:linear-gradient(135deg,#FF6B9D,#FF8E8E);border:none" onclick="submitHiddenConsent('Y')">✅ 동의해요!</button>
+      <button class="btn" style="flex:1;background:#f0f0f0;color:#888;border:none" onclick="submitHiddenConsent('N')">❌ 패스할게요</button>
+    </div>
+    <div id="hc-my-answer" style="display:none;text-align:center;margin-top:12px;font-size:.82rem;color:#C8B6E2"></div>
+  </div>
+  <div id="hc-spectator-msg" style="display:none;text-align:center;font-size:.82rem;color:#aaa;margin-bottom:12px">커플들의 동의를 기다리는 중이에요… 👀</div>
+  <div id="hc-status" style="margin-top:12px;background:#F3EEFF;border-radius:14px;padding:12px;font-size:.78rem;color:#7B5EA7;width:100%;box-sizing:border-box"></div>
+  <div id="hc-host-panel" style="display:none;width:100%;margin-top:12px">
+    <button id="hc-start-btn" class="btn btn-gold" style="display:none" onclick="startHiddenStage()">🚀 히든 스테이지 시작하기!</button>
+    <button id="hc-cancel-btn" class="btn btn-sec" style="display:none;margin-top:8px" onclick="cancelHiddenStage()">취소</button>
+  </div>
 </div>
 
 <!-- 히든 스테이지 질문 -->
@@ -534,6 +564,7 @@ async function syncAndRender(){
   else if(s==='revealing_custom_q')renderRevealCustomQ(room,players,answers);
   else if(s==='final')renderFinal(room,players,finals);
   else if(s==='ended')renderEnd(players,finals,answers);
+  else if(s==='hidden_consent')renderHiddenConsent(room,players,finals);
   else if(s==='hidden_stage')renderHiddenQ(room,players,finals,answers);
   else if(s==='hidden_reveal')renderHiddenRev(room,players,finals,answers);
 }
@@ -1055,6 +1086,68 @@ const HIDDEN_QS=[
 
 // custom_q hiddenHistory: [{qi, q, A, B}, ...]
 function getHiddenCQ(room){return room.custom_q?JSON.parse(room.custom_q):{};}
+
+async function triggerHiddenConsent(){
+  await sb.from('rooms').update({status:'hidden_consent'}).eq('id',roomId);
+}
+
+async function submitHiddenConsent(choice){
+  const cq=getHiddenCQ(await sb.from('rooms').select('custom_q').eq('id',roomId).single().then(r=>r.data));
+  const consents={...(cq.hiddenConsents||{}),[myId]:choice};
+  const newCQ={...cq,hiddenConsents:consents};
+  await sb.from('rooms').update({custom_q:JSON.stringify(newCQ)}).eq('id',roomId);
+}
+
+async function cancelHiddenStage(){
+  await sb.from('rooms').update({status:'ended'}).eq('id',roomId);
+}
+
+function renderHiddenConsent(room,players,finals){
+  show('s-hidden-consent');
+  const cq=getHiddenCQ(room);
+  const consents=cq.hiddenConsents||{};
+  const couples=getCouples(players,finals);
+  const coupleIds=new Set(couples.flat().map(p=>p.id));
+  const isCoupled=coupleIds.has(myId);
+  const myConsent=consents[myId];
+
+  // Show/hide sections
+  document.getElementById('hc-couple-wrap').style.display=isCoupled?'block':'none';
+  document.getElementById('hc-spectator-msg').style.display=isCoupled?'none':'block';
+
+  // My answer state
+  const myAnswerEl=document.getElementById('hc-my-answer');
+  if(isCoupled&&myConsent){
+    document.getElementById('hc-couple-wrap').querySelectorAll('button').forEach(b=>b.style.display='none');
+    myAnswerEl.style.display='block';
+    myAnswerEl.textContent=myConsent==='Y'?'✅ 동의 완료! 다른 커플들을 기다리는 중…':'❌ 패스를 선택했어요';
+  } else {
+    document.getElementById('hc-couple-wrap').querySelectorAll('button').forEach(b=>b.style.display='');
+    myAnswerEl.style.display='none';
+  }
+
+  // Status board
+  const coupleList=couples.map(([pA,pB],ci)=>{
+    const cA=consents[pA.id],cB=consents[pB.id];
+    const icon=c=>(c==='Y'?'✅':c==='N'?'❌':'⏳');
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+      <span>${icon(cA)}</span><span style="font-size:.8rem;font-weight:700;color:#7B5EA7">커플 ${ci+1}</span><span>${icon(cB)}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('hc-status').innerHTML=coupleList||'<span style="color:#aaa">커플 정보 없음</span>';
+
+  // Host panel
+  const hostPanel=document.getElementById('hc-host-panel');
+  hostPanel.style.display=isHost?'block':'none';
+  if(isHost){
+    const coupleArr=couples.flat().map(p=>p.id);
+    const allAnswered=coupleArr.every(id=>consents[id]);
+    const anyNo=coupleArr.some(id=>consents[id]==='N');
+    const allYes=coupleArr.length>0&&coupleArr.every(id=>consents[id]==='Y');
+    document.getElementById('hc-start-btn').style.display=allYes?'block':'none';
+    document.getElementById('hc-cancel-btn').style.display=(anyNo||allAnswered&&!allYes)?'block':'none';
+  }
+}
 
 async function startHiddenStage(){
   const picked=Math.floor(Math.random()*HIDDEN_QS.length);
