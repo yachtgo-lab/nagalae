@@ -325,12 +325,21 @@ input:focus{border-color:#7B5EA7}
   <h2 style="font-size:1.05rem;margin-bottom:16px">💫 커플들의 은밀한 질문</h2>
   <!-- 내 이모지 뱃지 (커플된 플레이어용) -->
   <div id="hidden-my-emoji" style="display:none;align-items:center;justify-content:center;gap:4px;background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:14px;padding:10px 16px;margin-bottom:12px;border:2px solid #F4A8D0;width:100%;box-sizing:border-box"></div>
-  <div id="hidden-spectator" style="display:none;background:#F3EEFF;border-radius:18px;padding:20px;text-align:center;margin-bottom:16px">
-    <div style="font-size:2rem;margin-bottom:8px">👀</div>
-    <div style="font-weight:800;color:#7B5EA7;margin-bottom:6px">관전 모드</div>
-    <div style="font-size:.82rem;color:#aaa">커플들이 답변 중이에요…</div>
-    <div id="hidden-spec-couples" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
-    <div id="hidden-spec-progress" style="margin-top:8px;font-size:.78rem;color:#C8B6E2"></div>
+  <div id="hidden-spectator" style="display:none;margin-bottom:16px">
+    <div style="background:#F3EEFF;border-radius:18px;padding:14px 16px;text-align:center;margin-bottom:10px">
+      <div style="font-size:1.5rem;margin-bottom:4px">👀</div>
+      <div style="font-weight:800;color:#7B5EA7;margin-bottom:4px">관전 모드</div>
+      <div id="hidden-spec-couples" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+      <div id="hidden-spec-progress" style="margin-top:6px;font-size:.78rem;color:#C8B6E2"></div>
+    </div>
+    <div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:20px;padding:16px;border:2px solid #F4A8D0">
+      <div style="font-size:.72rem;font-weight:700;color:#E05E9B;letter-spacing:.08em;margin-bottom:8px">💕 HIDDEN QUESTION</div>
+      <div id="hidden-spec-q" style="font-size:1rem;font-weight:900;color:#5B2D7E;line-height:1.5;word-break:keep-all;margin-bottom:12px"></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div id="hidden-spec-a" style="padding:10px 14px;border-radius:12px;background:#FFE8E8;color:#D45F5F;font-weight:700;font-size:.88rem;word-break:keep-all"></div>
+        <div id="hidden-spec-b" style="padding:10px 14px;border-radius:12px;background:#E8F4FF;color:#3A7ED4;font-weight:700;font-size:.88rem;word-break:keep-all"></div>
+      </div>
+    </div>
   </div>
   <div id="hidden-q-wrap" style="display:none;width:100%">
     <div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:20px;padding:20px;margin-bottom:16px;border:2px solid #F4A8D0">
@@ -1275,6 +1284,12 @@ function renderHiddenQ(room,players,finals,answers){
   const specCouplesEl=document.getElementById('hidden-spec-couples');
   if(specCouplesEl&&!isCoupled){
     specCouplesEl.innerHTML=(cq.coupleEmojis||[]).map(c=>`<span style="font-size:1.2rem">${c.eA}${c.heart}${c.eB}</span>`).join('  ');
+    const specQ=document.getElementById('hidden-spec-q');
+    const specA=document.getElementById('hidden-spec-a');
+    const specB=document.getElementById('hidden-spec-b');
+    if(specQ)specQ.textContent=hq.q;
+    if(specA)specA.textContent='A. '+hq.A.replace(/^❤️\s*/,'');
+    if(specB)specB.textContent='B. '+hq.B.replace(/^💙\s*/,'');
   }
 
   if(!isCoupled){
