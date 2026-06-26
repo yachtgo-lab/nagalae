@@ -283,6 +283,9 @@ input:focus{border-color:#7B5EA7}
   <div id="hidden-stage-btn-wrap" style="display:none;margin-bottom:10px">
     <button class="btn btn-gold" onclick="triggerHiddenConsent()">✨ 히든 스테이지 시작!</button>
   </div>
+  <div id="hidden-stage-hint" style="display:none;background:#FFF0F8;border-radius:14px;padding:10px 14px;margin-bottom:12px;border:1.5px dashed #F4A8D0;text-align:center;font-size:.78rem;color:#E05E9B;line-height:1.6">
+    💫 방장이 히든 스테이지를 준비 중일 수 있어요!<br><span style="color:#aaa;font-size:.72rem">잠깐 기다려봐요 👀</span>
+  </div>
   <button class="btn btn-sec" onclick="location.reload()">다시 모험하기 🔄</button>
 </div>
 
@@ -1487,10 +1490,14 @@ function renderEnd(players,finals,answers){
   }
   document.getElementById('end-content').innerHTML=html;
   const btnWrap=document.getElementById('hidden-stage-btn-wrap');
-  if(isHost&&matches.length>=1&&!answers.some(a=>a.stage===98)){
+  const hasHidden=answers.some(a=>a.stage===98);
+  const hintEl=document.getElementById('hidden-stage-hint');
+  if(isHost&&matches.length>=1&&!hasHidden){
     btnWrap.style.display='block';
+    if(hintEl)hintEl.style.display='none';
   } else {
     btnWrap.style.display='none';
+    if(hintEl)hintEl.style.display=(!hasHidden&&matches.length>=1)?'block':'none';
   }
 }
 </script>
