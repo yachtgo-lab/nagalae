@@ -312,8 +312,23 @@ input:focus{border-color:#7B5EA7}
       <div id="hidden-ans-progress" style="margin-top:8px;font-size:.78rem;color:#C8B6E2"></div>
     </div>
   </div>
-  <div id="hidden-host-reveal-wrap" style="display:none;width:100%;margin-top:10px">
-    <button class="btn btn-gold" onclick="revealHiddenStage()">🔮 결과 공개하기</button>
+  <div id="hidden-host-panel" style="display:none;width:100%;margin-top:10px">
+    <div style="background:#FFF0F8;border-radius:16px;padding:14px;border:2px solid #F4A8D0;margin-bottom:10px">
+      <div style="font-size:.72rem;font-weight:700;color:#E05E9B;margin-bottom:10px">👑 방장 패널 — 다음 질문</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn" style="background:#fff;color:#7B5EA7;border:2px solid #C8B6E2;font-size:.88rem" onclick="hostHiddenRandom()">🎲 랜덤 질문 뽑기</button>
+        <button class="btn" style="background:#fff;color:#7B5EA7;border:2px solid #C8B6E2;font-size:.88rem" onclick="hostHiddenCustom()">✏️ 직접 질문 입력</button>
+        <button class="btn" style="background:#fff;color:#E05E9B;border:2px solid #F4A8D0;font-size:.88rem" onclick="endHiddenStage()">🏁 히든 스테이지 종료</button>
+      </div>
+    </div>
+    <div id="hidden-custom-input" style="display:none">
+      <textarea id="hidden-custom-q-text" placeholder="질문을 입력하세요…" style="width:100%;box-sizing:border-box;padding:12px;border-radius:12px;border:2px solid #C8B6E2;font-size:.9rem;resize:none;height:80px;font-family:inherit;margin-bottom:6px"></textarea>
+      <div style="display:flex;gap:6px">
+        <input id="hidden-custom-a" placeholder="❤️ A 선택지" style="flex:1;padding:8px 10px;border-radius:10px;border:2px solid #FFB5A7;font-size:.82rem;font-family:inherit">
+        <input id="hidden-custom-b" placeholder="💙 B 선택지" style="flex:1;padding:8px 10px;border-radius:10px;border:2px solid #9DD9D2;font-size:.82rem;font-family:inherit">
+      </div>
+      <button class="btn btn-gold" style="margin-top:8px" onclick="submitHiddenCustomQ()">질문 시작하기</button>
+    </div>
   </div>
 </div>
 
@@ -517,7 +532,7 @@ async function syncAndRender(){
   else if(s==='final')renderFinal(room,players,finals);
   else if(s==='ended')renderEnd(players,finals,answers);
   else if(s==='hidden_stage')renderHiddenQ(room,players,finals,answers);
-  else if(s==='hidden_reveal')renderHiddenRev(players,finals,answers);
+  else if(s==='hidden_reveal')renderHiddenRev(room,players,finals,answers);
 }
 
 // ─── Waiting ────────────────────────────────────────────────────
@@ -1032,44 +1047,80 @@ const HIDDEN_QS=[
   {q:'누군가가 먼저 다가온다면',A:'❤️ 적극적으로 대화를 이어간다',B:'💙 천천히 분위기를 맞춰간다'},
 ];
 
+// custom_q hiddenHistory: [{qi, q, A, B}, ...]
+function getHiddenCQ(room){return room.custom_q?JSON.parse(room.custom_q):{};}
+
 async function startHiddenStage(){
-  await sb.from('rooms').update({status:'hidden_stage',question_idx:0}).eq('id',roomId);
+  const picked=Math.floor(Math.random()*HIDDEN_QS.length);
+  const hq=HIDDEN_QS[picked];
+  const {data:room}=await sb.from('rooms').select('custom_q').eq('id',roomId).single();
+  const prevCQ=getHiddenCQ(room);
+  const entry={qi:1,q:hq.q,A:hq.A,B:hq.B};
+  const newCQ={...prevCQ,hiddenHistory:[entry],usedHiddenIdx:[picked]};
+  await sb.from('rooms').update({status:'hidden_stage',question_idx:1,custom_q:JSON.stringify(newCQ)}).eq('id',roomId);
 }
 
 async function submitHiddenAnswer(choice){
-  const qi=parseInt(document.getElementById('hidden-q-wrap').dataset.qi||'0');
+  const qi=parseInt(document.getElementById('hidden-q-wrap').dataset.qi||'1');
   await sb.from('answers').upsert({room_id:roomId,player_id:myId,stage:98,question_idx:qi,choice},{onConflict:'room_id,player_id,stage,question_idx'});
 }
 
-async function revealHiddenStage(){
-  const {data:room}=await sb.from('rooms').select('question_idx').eq('id',roomId).single();
-  const qi=(room.question_idx||0);
-  const nextQi=qi+1;
-  if(nextQi<HIDDEN_QS.length){
-    await sb.from('rooms').update({question_idx:nextQi}).eq('id',roomId);
-  } else {
-    await sb.from('rooms').update({status:'hidden_reveal'}).eq('id',roomId);
-  }
+async function hostHiddenRandom(){
+  const {data:room}=await sb.from('rooms').select('question_idx,custom_q').eq('id',roomId).single();
+  const nextQi=(room.question_idx||1)+1;
+  const cq=getHiddenCQ(room);
+  const used=cq.usedHiddenIdx||[];
+  const available=HIDDEN_QS.map((_,i)=>i).filter(i=>!used.includes(i));
+  const pool=available.length?available:HIDDEN_QS.map((_,i)=>i);
+  const picked=pool[Math.floor(Math.random()*pool.length)];
+  const hq=HIDDEN_QS[picked];
+  const entry={qi:nextQi,q:hq.q,A:hq.A,B:hq.B};
+  const newCQ={...cq,hiddenHistory:[...(cq.hiddenHistory||[]),entry],usedHiddenIdx:[...used,picked]};
+  await sb.from('rooms').update({question_idx:nextQi,custom_q:JSON.stringify(newCQ)}).eq('id',roomId);
+}
+
+function hostHiddenCustom(){
+  const ci=document.getElementById('hidden-custom-input');
+  ci.style.display=ci.style.display==='none'?'block':'none';
+}
+
+async function submitHiddenCustomQ(){
+  const q=document.getElementById('hidden-custom-q-text').value.trim();
+  const a=document.getElementById('hidden-custom-a').value.trim();
+  const b=document.getElementById('hidden-custom-b').value.trim();
+  if(!q||!a||!b){toast('질문과 선택지를 모두 입력해주세요!');return;}
+  const {data:room}=await sb.from('rooms').select('question_idx,custom_q').eq('id',roomId).single();
+  const nextQi=(room.question_idx||1)+1;
+  const cq=getHiddenCQ(room);
+  const entry={qi:nextQi,q,A:'❤️ '+a,B:'💙 '+b};
+  const newCQ={...cq,hiddenHistory:[...(cq.hiddenHistory||[]),entry]};
+  await sb.from('rooms').update({question_idx:nextQi,custom_q:JSON.stringify(newCQ)}).eq('id',roomId);
+}
+
+async function endHiddenStage(){
+  await sb.from('rooms').update({status:'hidden_reveal'}).eq('id',roomId);
 }
 
 function renderHiddenQ(room,players,finals,answers){
   show('s-hidden-q');
-  const qi=room.question_idx||0;
-  const hq=HIDDEN_QS[qi]||HIDDEN_QS[0];
+  const actualQi=room.question_idx||1;
+  const cq=room.custom_q?JSON.parse(room.custom_q):{};
+  const history=cq.hiddenHistory||[];
+  const currentEntry=history.find(e=>e.qi===actualQi)||history[history.length-1]||HIDDEN_QS[0];
+  const hq={q:currentEntry.q,A:currentEntry.A,B:currentEntry.B};
   const couples=getCouples(players,finals);
   const coupleIds=new Set(couples.flat().map(p=>p.id));
   const isCoupled=coupleIds.has(myId);
   const coupleCount=coupleIds.size;
-  const answeredCount=answers.filter(a=>a.stage===98&&a.question_idx===qi&&coupleIds.has(a.player_id)).length;
+  const answeredCount=answers.filter(a=>a.stage===98&&a.question_idx===actualQi&&coupleIds.has(a.player_id)).length;
   const allAnswered=answeredCount>=coupleCount;
-  const myAnswer=answers.find(a=>a.stage===98&&a.question_idx===qi&&a.player_id===myId);
+  const myAnswer=answers.find(a=>a.stage===98&&a.question_idx===actualQi&&a.player_id===myId);
 
   // Update question text & buttons
   document.getElementById('hidden-q-text').textContent=hq.q;
   document.getElementById('hidden-btn-a').textContent=hq.A;
   document.getElementById('hidden-btn-b').textContent=hq.B;
 
-  // Show progress indicator
   const progressTxt=`${answeredCount}/${coupleCount}명 답변 완료`;
 
   if(!isCoupled){
@@ -1079,7 +1130,7 @@ function renderHiddenQ(room,players,finals,answers){
   } else {
     document.getElementById('hidden-spectator').style.display='none';
     document.getElementById('hidden-q-wrap').style.display='block';
-    document.getElementById('hidden-q-wrap').dataset.qi=qi;
+    document.getElementById('hidden-q-wrap').dataset.qi=actualQi;
     if(myAnswer){
       document.getElementById('hidden-btn-a').style.display='none';
       document.getElementById('hidden-btn-b').style.display='none';
@@ -1092,22 +1143,31 @@ function renderHiddenQ(room,players,finals,answers){
     }
   }
 
-  const revWrap=document.getElementById('hidden-host-reveal-wrap');
-  revWrap.style.display=isHost&&allAnswered?'block':'none';
+  const hostPanel=document.getElementById('hidden-host-panel');
+  hostPanel.style.display=isHost&&allAnswered?'block':'none';
+  if(isHost&&allAnswered){
+    document.getElementById('hidden-custom-input').style.display='none';
+    document.getElementById('hidden-custom-q-text').value='';
+    document.getElementById('hidden-custom-a').value='';
+    document.getElementById('hidden-custom-b').value='';
+  }
 }
 
-function renderHiddenRev(players,finals,answers){
+function renderHiddenRev(room,players,finals,answers){
   show('s-hidden-rev');
   const couples=getCouples(players,finals);
   const COLORS=['#FF6B6B','#4ECDC4','#FECA57','#A29BFE','#FD79A8','#00CEC9','#E17055','#74B9FF','#55EFC4','#FDCB6E'];
 
+  const cq=room.custom_q?JSON.parse(room.custom_q):{};
+  const hiddenHistory=cq.hiddenHistory||[];
   let html='';
-  // Per question results
-  HIDDEN_QS.forEach((hq,qi)=>{
+  hiddenHistory.forEach((entry)=>{
+    const qi=entry.qi;
     const qAnswers=answers.filter(a=>a.stage===98&&a.question_idx===qi);
     if(!qAnswers.length)return;
+    const hq={q:entry.q,A:entry.A,B:entry.B};
     html+=`<div style="background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;border:2px solid #F4A8D0">
-      <div style="font-size:.7rem;font-weight:700;color:#E05E9B;margin-bottom:8px">Q${qi+1}. ${esc(hq.q)}</div>`;
+      <div style="font-size:.7rem;font-weight:700;color:#E05E9B;margin-bottom:8px">Q${qi}. ${esc(hq.q)}</div>`;
     couples.forEach(([pA,pB],ci)=>{
       const color=COLORS[ci%COLORS.length];
       const ansA=qAnswers.find(a=>a.player_id===pA.id);
@@ -1195,7 +1255,7 @@ function renderEnd(players,finals,answers){
   }
   document.getElementById('end-content').innerHTML=html;
   const btnWrap=document.getElementById('hidden-stage-btn-wrap');
-  if(isHost&&matches.length>=2&&!answers.some(a=>a.stage===98)){
+  if(isHost&&matches.length>=1&&!answers.some(a=>a.stage===98)){
     btnWrap.style.display='block';
   } else {
     btnWrap.style.display='none';
