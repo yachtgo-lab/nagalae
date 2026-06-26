@@ -46,6 +46,7 @@ input:focus{border-color:#7B5EA7}
 .cat-bbl{background:#fff;border-radius:0 16px 16px 16px;padding:12px;font-size:.95rem;font-weight:700;color:#333;line-height:1.5;flex:1;box-shadow:0 2px 8px rgba(0,0,0,.07)}
 .cat-lbl{font-size:.7rem;color:#9DD9D2;font-weight:700;margin-bottom:4px}
 .wmsg{font-size:.85rem;color:#bbb;text-align:center;animation:pulse 1.6s ease-in-out infinite}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}80%{opacity:.8;transform:translateY(-160px) scale(1.3)}100%{opacity:0;transform:translateY(-200px) scale(.8)}}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 .qcnt{font-size:.78rem;color:#aaa;text-align:center}
 
@@ -332,6 +333,12 @@ input:focus{border-color:#7B5EA7}
       <div style="font-weight:800;color:#7B5EA7;margin-bottom:4px">관전 모드</div>
       <div id="hidden-spec-couples" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
       <div id="hidden-spec-progress" style="margin-top:6px;font-size:.78rem;color:#C8B6E2"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button onclick="sendReaction('❤️')" style="font-size:1.5rem;background:#FFF0F8;border:2px solid #F4A8D0;border-radius:50%;width:48px;height:48px;cursor:pointer;transition:transform .1s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">❤️</button>
+      <button onclick="sendReaction('👍')" style="font-size:1.5rem;background:#F3EEFF;border:2px solid #C8B6E2;border-radius:50%;width:48px;height:48px;cursor:pointer;transition:transform .1s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">👍</button>
+      <button onclick="sendReaction('😮')" style="font-size:1.5rem;background:#FFF8E8;border:2px solid #F4D89D;border-radius:50%;width:48px;height:48px;cursor:pointer;transition:transform .1s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">😮</button>
+      <button onclick="sendReaction('🔥')" style="font-size:1.5rem;background:#FFF0E8;border:2px solid #F4B89D;border-radius:50%;width:48px;height:48px;cursor:pointer;transition:transform .1s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">🔥</button>
+    </div>
     </div>
     <div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:20px;padding:16px;border:2px solid #F4A8D0">
       <div style="font-size:.72rem;font-weight:700;color:#E05E9B;letter-spacing:.08em;margin-bottom:8px">💕 HIDDEN QUESTION</div>
@@ -356,6 +363,12 @@ input:focus{border-color:#7B5EA7}
       <div style="font-weight:800;color:#7B5EA7">답변 완료!</div>
       <div style="font-size:.8rem;color:#aaa;margin-top:4px">다른 커플들을 기다리는 중…</div>
       <div id="hidden-ans-progress" style="margin-top:8px;font-size:.78rem;color:#C8B6E2"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button onclick="sendReaction('❤️')" style="font-size:1.5rem;background:#FFF0F8;border:2px solid #F4A8D0;border-radius:50%;width:48px;height:48px;cursor:pointer;transition:transform .1s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">❤️</button>
+        <button onclick="sendReaction('👍')" style="font-size:1.5rem;background:#F3EEFF;border:2px solid #C8B6E2;border-radius:50%;width:48px;height:48px;cursor:pointer;transition:transform .1s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">👍</button>
+        <button onclick="sendReaction('😮')" style="font-size:1.5rem;background:#FFF8E8;border:2px solid #F4D89D;border-radius:50%;width:48px;height:48px;cursor:pointer;transition:transform .1s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">😮</button>
+        <button onclick="sendReaction('🔥')" style="font-size:1.5rem;background:#FFF0E8;border:2px solid #F4B89D;border-radius:50%;width:48px;height:48px;cursor:pointer;transition:transform .1s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">🔥</button>
+      </div>
     </div>
   </div>
   <!-- 실시간 미니 보드 (답변 완료 후 표시) -->
@@ -559,7 +572,21 @@ function subscribeRoom(){
   ['rooms','players','answers','final_choices'].forEach(tbl=>{
     channel.on('postgres_changes',{event:'*',schema:'public',table:tbl,filter:`${tbl==='rooms'?'id':'room_id'}=eq.${roomId}`},()=>syncAndRender());
   });
+  channel.on('broadcast',{event:'reaction'},(msg)=>showReactionFloat(msg.payload?.emoji||'❤️'));
   channel.subscribe();
+}
+function sendReaction(emoji){
+  if(!channel)return;
+  channel.send({type:'broadcast',event:'reaction',payload:{emoji}});
+  showReactionFloat(emoji);
+}
+function showReactionFloat(emoji){
+  const el=document.createElement('div');
+  const x=20+Math.random()*60;
+  el.style.cssText=`position:fixed;bottom:120px;left:${x}%;font-size:2rem;pointer-events:none;z-index:9999;animation:floatUp 2s ease-out forwards`;
+  el.textContent=emoji;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2000);
 }
 async function syncAndRender(){
   if(!roomId)return;
