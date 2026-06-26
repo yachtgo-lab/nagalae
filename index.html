@@ -348,6 +348,12 @@ input:focus{border-color:#7B5EA7}
       <div id="hidden-ans-progress" style="margin-top:8px;font-size:.78rem;color:#C8B6E2"></div>
     </div>
   </div>
+  <!-- 실시간 미니 보드 (답변 완료 후 표시) -->
+  <div id="hidden-mini-board" style="display:none;width:100%;margin-top:12px;border-radius:20px;background:linear-gradient(180deg,#FFF0F8 0%,#F3EEFF 60%,#EEF4FF 100%);border:2px solid #F4A8D0;overflow:hidden">
+    <div style="text-align:center;padding:8px 0 4px;font-size:.68rem;font-weight:700;color:#E05E9B;letter-spacing:.1em">✦ 선택 결과 ✦</div>
+    <div id="hidden-mini-board-inner" style="position:relative;width:100%"></div>
+  </div>
+
   <div id="hidden-host-panel" style="display:none;width:100%;margin-top:10px">
     <div style="background:#FFF0F8;border-radius:16px;padding:14px;border:2px solid #F4A8D0;margin-bottom:10px">
       <div style="font-size:.72rem;font-weight:700;color:#E05E9B;margin-bottom:10px">👑 방장 패널 — 다음 질문</div>
@@ -1290,6 +1296,22 @@ function renderHiddenQ(room,players,finals,answers){
     document.getElementById('hidden-custom-a').value='';
     document.getElementById('hidden-custom-b').value='';
   }
+
+  // Mini board animation — run once per qi when all answered
+  const miniBoardEl=document.getElementById('hidden-mini-board');
+  if(allAnswered){
+    if(window.__hiddenMiniBoardQi!==actualQi){
+      window.__hiddenMiniBoardQi=actualQi;
+      miniBoardEl.style.display='block';
+      const couples2=getCouples(players,finals);
+      const couplePlayerIds=couples2.flat().map(p=>p.id);
+      const coupledPlayers=players.filter(p=>couplePlayerIds.includes(p.id));
+      runHiddenMiniBoard(hq,actualQi,coupledPlayers,answers,cq.hiddenEmojis||{},cq.coupleEmojis||[]);
+    }
+  } else {
+    miniBoardEl.style.display='none';
+    window.__hiddenMiniBoardQi=null;
+  }
 }
 
 function renderHiddenRev(room,players,finals,answers){
@@ -1328,6 +1350,89 @@ function renderHiddenRev(room,players,finals,answers){
   const couplePlayerIds=couples.flat().map(p=>p.id);
   const allCoupledPlayers=players.filter(p=>couplePlayerIds.includes(p.id));
   startHiddenBoardAnim(hiddenHistory,allCoupledPlayers,answers,hiddenEmojis,coupleEmojis);
+}
+
+async function runHiddenMiniBoard(hq,qi,coupledPlayers,answers,hiddenEmojis,coupleEmojis){
+  const inner=document.getElementById('hidden-mini-board-inner');
+  if(!inner)return;
+  inner.innerHTML='';
+  const PIECE=36,ROW=140;
+  const W=inner.parentElement.offsetWidth||340;
+  inner.style.height=(ROW+60)+'px';
+  inner.style.position='relative';
+
+  // Center line
+  const vline=document.createElement('div');
+  vline.className='bline';
+  vline.style.cssText=`width:3px;top:0;height:${ROW+60}px`;
+  inner.appendChild(vline);
+
+  // Node
+  const nd=document.createElement('div');
+  nd.className='bnode';
+  nd.style.cssText=`width:36px;height:36px;top:20px;border-color:#F4A8D0;color:#E05E9B`;
+  nd.textContent='Q';
+  inner.appendChild(nd);
+
+  // Branch lines
+  const branchY=68,branchH=ROW-68;
+  const la=document.createElement('div');la.className='bline-a';
+  la.style.cssText=`width:3px;height:${branchH}px;top:${branchY}px;left:${W*0.25-1.5}px`;
+  inner.appendChild(la);
+  const lb2=document.createElement('div');lb2.className='bline-b';
+  lb2.style.cssText=`width:3px;height:${branchH}px;top:${branchY}px;left:${W*0.75-1.5}px`;
+  inner.appendChild(lb2);
+
+  // A/B labels
+  const lA=document.createElement('div');
+  lA.style.cssText=`position:absolute;top:${branchY+6}px;left:4px;width:${W*0.42}px;opacity:0;transition:opacity .4s;z-index:4`;
+  lA.innerHTML=`<div style="background:#FFB5A7;color:#fff;border-radius:10px;padding:4px 8px;font-size:.65rem;font-weight:700;text-align:center">❤️<br>${esc(hq.A.replace(/^❤️\s*/,''))}</div>`;
+  inner.appendChild(lA);
+  const lB=document.createElement('div');
+  lB.style.cssText=`position:absolute;top:${branchY+6}px;right:4px;width:${W*0.42}px;opacity:0;transition:opacity .4s;z-index:4`;
+  lB.innerHTML=`<div style="background:#9DD9D2;color:#fff;border-radius:10px;padding:4px 8px;font-size:.65rem;font-weight:700;text-align:center">💙<br>${esc(hq.B.replace(/^💙\s*/,''))}</div>`;
+  inner.appendChild(lB);
+
+  // Emoji pieces
+  const n=coupledPlayers.length;
+  const pieceData=coupledPlayers.map((p,pi)=>{
+    const emoji=hiddenEmojis[p.id]||'?';
+    const el=document.createElement('div');
+    el.style.cssText=`position:absolute;width:${PIECE}px;height:${PIECE+14}px;opacity:0;top:-50px;left:${W/2-PIECE/2}px;display:flex;flex-direction:column;align-items:center;gap:1px;transition:left .5s ease,top .5s ease,opacity .4s;z-index:5`;
+    el.innerHTML=`<div style="width:${PIECE}px;height:${PIECE}px;border-radius:50%;background:#FFF0F8;border:2px solid #F4A8D0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 8px rgba(244,168,208,.4)">${emoji}</div><div style="font-size:.48rem;font-weight:800;color:#E05E9B;background:rgba(255,255,255,.9);border-radius:6px;padding:1px 4px">?</div>`;
+    inner.appendChild(el);
+    return{el,p};
+  });
+
+  function placeG(group,xCenter,yCenter){
+    const cnt=group.length;if(!cnt)return;
+    const step=cnt>1?Math.min(PIECE+2,Math.max(10,(W*0.38-PIECE)/(cnt-1))):0;
+    const totalW=(cnt-1)*step+PIECE;
+    let sx=xCenter-totalW/2;sx=Math.max(2,Math.min(sx,W-totalW-2));
+    group.forEach(({el},i)=>{el.style.left=(sx+i*step)+'px';el.style.top=(yCenter-PIECE/2)+'px';});
+  }
+
+  // Animate: appear at top → show labels → split
+  await sleep(200);
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  const initStep=n>1?Math.min(PIECE+4,(W-PIECE)/(n-1)):0;
+  pieceData.forEach(({el},i)=>{
+    el.style.opacity='1';
+    el.style.left=(W/2+(i-(n-1)/2)*initStep-PIECE/2)+'px';
+    el.style.top='20px';
+  });
+  await sleep(600);
+  lA.style.opacity='1';lB.style.opacity='1';
+  await sleep(300);
+
+  // Split
+  const aGroup=[],bGroup=[];
+  pieceData.forEach(item=>{
+    const ans=answers.find(a=>a.player_id===item.p.id&&a.stage===98&&a.question_idx===qi);
+    (ans?.choice==='A'?aGroup:bGroup).push(item);
+  });
+  placeG(aGroup,W*0.28,branchY+branchH/2);
+  placeG(bGroup,W*0.72,branchY+branchH/2);
 }
 
 async function startHiddenBoardAnim(history,coupledPlayers,answers,hiddenEmojis,coupleEmojis){
