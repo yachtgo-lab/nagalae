@@ -621,14 +621,11 @@ async function startBoardAnim(stage,players,answers,room){
   function placeGroup(group,xCenter,yCenter){
     const cnt=group.length;
     if(!cnt)return;
-    // A(왼쪽)/B(오른쪽) 구역을 화면 절반으로 엄격하게 제한
-    const isLeft=xCenter<W/2;
-    const zoneL=isLeft?2:W/2+2;
-    const zoneR=isLeft?W/2-2:W-2;
-    const zoneW=zoneR-zoneL;
-    const step=cnt>1?Math.min(PIECE+2,(zoneW-PIECE)/(cnt-1)):0;
+    // xCenter(발판 위치) 기준으로 모아서 배치, 화면 밖으로 나가지 않게 클램프
+    const step=cnt>1?Math.min(PIECE+2,Math.max(10,(W*0.38-PIECE)/(cnt-1))):0;
     const totalW=(cnt-1)*step+PIECE;
-    const startX=(zoneL+zoneR-totalW)/2;
+    let startX=xCenter-totalW/2;
+    startX=Math.max(2,Math.min(startX,W-totalW-2));
     group.forEach(({el},i)=>{
       el.style.left=(startX+i*step)+'px';
       el.style.top=(yCenter-PIECE/2)+'px';
