@@ -620,8 +620,11 @@ async function startBoardAnim(stage,players,answers,room){
 
   function placeGroup(group,xCenter,yCenter){
     const cnt=group.length;
+    if(!cnt)return;
+    const maxHalf=Math.min(xCenter-PIECE/2, W-xCenter-PIECE/2);
+    const step=cnt>1?Math.min(PIECE+4,(maxHalf*2)/(cnt-1)):0;
     group.forEach(({el},i)=>{
-      const offset=(i-(cnt-1)/2)*(PIECE+4);
+      const offset=(i-(cnt-1)/2)*step;
       el.style.left=(xCenter+offset-PIECE/2)+'px';
       el.style.top=(yCenter-PIECE/2)+'px';
     });
@@ -631,8 +634,9 @@ async function startBoardAnim(stage,players,answers,room){
   await sleep(300);
   // Fade in at first node — RAF ensures transition fires after initial render
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  const initStep=n>1?Math.min(PIECE+4,(W-PIECE)/(n-1)):0;
   pieceData.forEach(({el},i)=>{
-    const offset=(i-(n-1)/2)*(PIECE+4);
+    const offset=(i-(n-1)/2)*initStep;
     el.style.opacity='1';
     el.style.left=(W/2+offset-PIECE/2)+'px';
     el.style.top=(60)+'px';
@@ -661,8 +665,9 @@ async function startBoardAnim(stage,players,answers,room){
     await sleep(800);
     // Reconverge to next node or lobby
     const nextY=qi<N-1?(qi+1)*ROW+60:N*ROW+60;
+    const cStep=n>1?Math.min(PIECE+4,(W-PIECE)/(n-1)):0;
     pieceData.forEach(({el},i)=>{
-      const offset=(i-(n-1)/2)*(PIECE+4);
+      const offset=(i-(n-1)/2)*cStep;
       el.style.left=(W/2+offset-PIECE/2)+'px';
       el.style.top=nextY+'px';
     });
