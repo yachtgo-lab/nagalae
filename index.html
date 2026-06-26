@@ -720,7 +720,9 @@ function renderQ(room,players,answers){
   flipWrap.classList.remove('expanded','growing');
   flipWrap.style.cssText='position:absolute;bottom:0;width:62px;height:88px;z-index:10';
   flipFront.className='flip-front';
+  flipFront.style.display='';
   flipBack.className='flip-back';
+  flipBack.style.display='';
   if(cardImg){flipFront.style.backgroundImage=`url(${cardImg})`;flipFront.style.backgroundSize='cover';flipFront.style.backgroundPosition='center';flipFront.innerHTML='';}
   else{flipFront.style.backgroundImage='';flipFront.innerHTML='✦';}
   bgCards.forEach(c=>{c.style.transform='rotate(0deg) translateX(0)';c.style.opacity='1';if(cardImg){c.style.backgroundImage=`url(${cardImg})`;c.style.backgroundSize='cover';c.style.backgroundPosition='center';c.innerHTML='';}else{c.style.backgroundImage='';c.innerHTML='✦';}});
