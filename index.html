@@ -838,14 +838,17 @@ function showCustomQForm(){
   document.getElementById('cq-form').style.display='flex';
 }
 async function hostPickRandomQ(){
-  // 아직 안 쓴 Q_POOL에서 랜덤 하나 선택
   const {data:room}=await sb.from('rooms').select().eq('id',roomId).single();
-  const usedQs=getQs(room).flat().map(q=>q.q);
+  const prevCQ=room.custom_q?JSON.parse(room.custom_q):null;
+  const prevHistory=prevCQ?.history||[];
+  const prevQ=prevCQ?.q;
+  const allUsedCustomQs=[...prevHistory,...(prevQ?[prevQ]:[])];
+  const usedQs=[...getQs(room).flat().map(q=>q.q),...allUsedCustomQs];
   const unused=Q_POOL.filter(q=>!usedQs.includes(q.q));
-  const pool=unused.length>0?unused:Q_POOL;
-  const seed=new Date(room.created_at).getTime()&0xffffffff;
-  const picked=seededShuffle(pool,seed+12345)[0];
-  const cq={q:picked.q,A:picked.A,B:picked.B,skip:false};
+  const pool=unused.length>0?unused:Q_POOL.filter(q=>!allUsedCustomQs.includes(q.q));
+  const seed=Date.now()&0xffffffff;
+  const picked=seededShuffle(pool,seed)[0];
+  const cq={q:picked.q,A:picked.A,B:picked.B,skip:false,history:allUsedCustomQs};
   await sb.from('rooms').update({custom_q:JSON.stringify(cq),status:'answering_custom_q'}).eq('id',roomId);
 }
 async function hostSubmitCustomQ(){
