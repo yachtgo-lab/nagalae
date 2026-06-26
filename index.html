@@ -280,7 +280,49 @@ input:focus{border-color:#7B5EA7}
 <div id="s-end" class="screen">
   <h2>🔮 운명의 문</h2>
   <div id="end-content" style="width:100%"></div>
+  <div id="hidden-stage-btn-wrap" style="display:none;margin-bottom:10px">
+    <button class="btn btn-gold" onclick="startHiddenStage()">✨ 히든 스테이지 시작!</button>
+  </div>
   <button class="btn btn-sec" onclick="location.reload()">다시 모험하기 🔄</button>
+</div>
+
+<!-- 히든 스테이지 질문 -->
+<div id="s-hidden-q" class="screen">
+  <div style="font-size:.65rem;letter-spacing:.2em;color:#C8B6E2;font-weight:700;margin-bottom:6px">✦ HIDDEN STAGE ✦</div>
+  <h2 style="font-size:1.05rem;margin-bottom:16px">💫 커플들의 은밀한 질문</h2>
+  <div id="hidden-spectator" style="display:none;background:#F3EEFF;border-radius:18px;padding:20px;text-align:center;margin-bottom:16px">
+    <div style="font-size:2rem;margin-bottom:8px">👀</div>
+    <div style="font-weight:800;color:#7B5EA7;margin-bottom:6px">관전 모드</div>
+    <div style="font-size:.82rem;color:#aaa">커플들이 답변 중이에요…</div>
+    <div id="hidden-spec-progress" style="margin-top:12px;font-size:.78rem;color:#C8B6E2"></div>
+  </div>
+  <div id="hidden-q-wrap" style="display:none;width:100%">
+    <div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:20px;padding:20px;margin-bottom:16px;border:2px solid #F4A8D0">
+      <div style="font-size:.72rem;font-weight:700;color:#E05E9B;letter-spacing:.08em;margin-bottom:10px">💕 HIDDEN QUESTION</div>
+      <div id="hidden-q-text" style="font-size:1rem;font-weight:900;color:#5B2D7E;line-height:1.5;word-break:keep-all">마음에 드는 사람이 생기면</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+      <button class="btn" id="hidden-btn-a" style="background:linear-gradient(135deg,#FF6B9D,#FF8E8E);border:none;font-size:.95rem" onclick="submitHiddenAnswer('A')">❤️ 표현하는 편이다</button>
+      <button class="btn" id="hidden-btn-b" style="background:linear-gradient(135deg,#6B9DFF,#8EC5FF);border:none;font-size:.95rem" onclick="submitHiddenAnswer('B')">💙 천천히 알아가는 편이다</button>
+    </div>
+    <div id="hidden-answered-msg" style="display:none;text-align:center;padding:20px;background:#F3EEFF;border-radius:16px;margin-top:10px">
+      <div style="font-size:1.5rem;margin-bottom:6px">✅</div>
+      <div style="font-weight:800;color:#7B5EA7">답변 완료!</div>
+      <div style="font-size:.8rem;color:#aaa;margin-top:4px">다른 커플들을 기다리는 중…</div>
+      <div id="hidden-ans-progress" style="margin-top:8px;font-size:.78rem;color:#C8B6E2"></div>
+    </div>
+  </div>
+  <div id="hidden-host-reveal-wrap" style="display:none;width:100%;margin-top:10px">
+    <button class="btn btn-gold" onclick="revealHiddenStage()">🔮 결과 공개하기</button>
+  </div>
+</div>
+
+<!-- 히든 스테이지 결과 -->
+<div id="s-hidden-rev" class="screen">
+  <div style="font-size:.65rem;letter-spacing:.2em;color:#C8B6E2;font-weight:700;margin-bottom:6px">✦ HIDDEN STAGE RESULT ✦</div>
+  <h2 style="font-size:1.05rem;margin-bottom:16px">💫 커플들의 선택</h2>
+  <div id="hidden-rev-content" style="width:100%"></div>
+  <button class="btn btn-sec" style="margin-top:10px" onclick="location.reload()">다시 모험하기 🔄</button>
 </div>
 
 </div>
@@ -473,7 +515,9 @@ async function syncAndRender(){
   else if(s==='answering_custom_q')renderAnsweringCustomQ(room,players,answers);
   else if(s==='revealing_custom_q')renderRevealCustomQ(room,players,answers);
   else if(s==='final')renderFinal(room,players,finals);
-  else if(s==='ended')renderEnd(players,finals);
+  else if(s==='ended')renderEnd(players,finals,answers);
+  else if(s==='hidden_stage')renderHiddenQ(room,players,finals,answers);
+  else if(s==='hidden_reveal')renderHiddenRev(players,finals,answers);
 }
 
 // ─── Waiting ────────────────────────────────────────────────────
@@ -965,8 +1009,7 @@ async function submitFinal(targetId){
 }
 
 // ─── End ──────────────────────────────────────────────────────────
-function renderEnd(players,finals){
-  show('s-end');
+function getCouples(players,finals){
   const matches=[],used=new Set();
   players.forEach(p=>{
     if(used.has(p.id))return;
@@ -978,6 +1021,134 @@ function renderEnd(players,finals){
       used.add(p.id);used.add(ch);
     }
   });
+  return matches;
+}
+
+const HIDDEN_QS=[
+  {q:'마음에 드는 사람이 생기면',A:'❤️ 표현하는 편이다',B:'💙 천천히 알아가는 편이다'},
+  {q:'오늘 함께한 사람들 중',A:'❤️ 더 이야기해보고 싶은 사람이 있다',B:'💙 다음 모임에서 천천히 알아가고 싶다'},
+  {q:'게임이 끝난다면',A:'❤️ 먼저 연락해볼 수 있다',B:'💙 다음 기회에 자연스럽게 연락하고 싶다'},
+  {q:'연락처를 교환한다면',A:'❤️ 오늘 바로 교환하고 싶다',B:'💙 조금 더 친해진 후 교환하고 싶다'},
+  {q:'누군가가 먼저 다가온다면',A:'❤️ 적극적으로 대화를 이어간다',B:'💙 천천히 분위기를 맞춰간다'},
+];
+
+async function startHiddenStage(){
+  await sb.from('rooms').update({status:'hidden_stage',question_idx:0}).eq('id',roomId);
+}
+
+async function submitHiddenAnswer(choice){
+  const qi=parseInt(document.getElementById('hidden-q-wrap').dataset.qi||'0');
+  await sb.from('answers').upsert({room_id:roomId,player_id:myId,stage:98,question_idx:qi,choice},{onConflict:'room_id,player_id,stage,question_idx'});
+}
+
+async function revealHiddenStage(){
+  const {data:room}=await sb.from('rooms').select('question_idx').eq('id',roomId).single();
+  const qi=(room.question_idx||0);
+  const nextQi=qi+1;
+  if(nextQi<HIDDEN_QS.length){
+    await sb.from('rooms').update({question_idx:nextQi}).eq('id',roomId);
+  } else {
+    await sb.from('rooms').update({status:'hidden_reveal'}).eq('id',roomId);
+  }
+}
+
+function renderHiddenQ(room,players,finals,answers){
+  show('s-hidden-q');
+  const qi=room.question_idx||0;
+  const hq=HIDDEN_QS[qi]||HIDDEN_QS[0];
+  const couples=getCouples(players,finals);
+  const coupleIds=new Set(couples.flat().map(p=>p.id));
+  const isCoupled=coupleIds.has(myId);
+  const coupleCount=coupleIds.size;
+  const answeredCount=answers.filter(a=>a.stage===98&&a.question_idx===qi&&coupleIds.has(a.player_id)).length;
+  const allAnswered=answeredCount>=coupleCount;
+  const myAnswer=answers.find(a=>a.stage===98&&a.question_idx===qi&&a.player_id===myId);
+
+  // Update question text & buttons
+  document.getElementById('hidden-q-text').textContent=hq.q;
+  document.getElementById('hidden-btn-a').textContent=hq.A;
+  document.getElementById('hidden-btn-b').textContent=hq.B;
+
+  // Show progress indicator
+  const progressTxt=`${answeredCount}/${coupleCount}명 답변 완료`;
+
+  if(!isCoupled){
+    document.getElementById('hidden-spectator').style.display='block';
+    document.getElementById('hidden-q-wrap').style.display='none';
+    document.getElementById('hidden-spec-progress').textContent=progressTxt;
+  } else {
+    document.getElementById('hidden-spectator').style.display='none';
+    document.getElementById('hidden-q-wrap').style.display='block';
+    document.getElementById('hidden-q-wrap').dataset.qi=qi;
+    if(myAnswer){
+      document.getElementById('hidden-btn-a').style.display='none';
+      document.getElementById('hidden-btn-b').style.display='none';
+      document.getElementById('hidden-answered-msg').style.display='block';
+      document.getElementById('hidden-ans-progress').textContent=progressTxt;
+    } else {
+      document.getElementById('hidden-btn-a').style.display='';
+      document.getElementById('hidden-btn-b').style.display='';
+      document.getElementById('hidden-answered-msg').style.display='none';
+    }
+  }
+
+  const revWrap=document.getElementById('hidden-host-reveal-wrap');
+  revWrap.style.display=isHost&&allAnswered?'block':'none';
+}
+
+function renderHiddenRev(players,finals,answers){
+  show('s-hidden-rev');
+  const couples=getCouples(players,finals);
+  const COLORS=['#FF6B6B','#4ECDC4','#FECA57','#A29BFE','#FD79A8','#00CEC9','#E17055','#74B9FF','#55EFC4','#FDCB6E'];
+
+  let html='';
+  // Per question results
+  HIDDEN_QS.forEach((hq,qi)=>{
+    const qAnswers=answers.filter(a=>a.stage===98&&a.question_idx===qi);
+    if(!qAnswers.length)return;
+    html+=`<div style="background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;border:2px solid #F4A8D0">
+      <div style="font-size:.7rem;font-weight:700;color:#E05E9B;margin-bottom:8px">Q${qi+1}. ${esc(hq.q)}</div>`;
+    couples.forEach(([pA,pB],ci)=>{
+      const color=COLORS[ci%COLORS.length];
+      const ansA=qAnswers.find(a=>a.player_id===pA.id);
+      const ansB=qAnswers.find(a=>a.player_id===pB.id);
+      const choiceA=ansA?.choice;
+      const choiceB=ansB?.choice;
+      html+=`<div style="background:#FFF8FC;border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:4px solid ${color}">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+          <div style="width:22px;height:22px;border-radius:50%;background:${color};flex-shrink:0"></div>
+          <span style="font-weight:800;color:#5B2D7E">?</span>
+          <span style="font-size:.78rem;color:#888">${choiceA?(choiceA==='A'?hq.A:hq.B):'미답변'}</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="width:22px;height:22px;border-radius:50%;background:${color};flex-shrink:0;opacity:.6"></div>
+          <span style="font-weight:800;color:#5B2D7E">?</span>
+          <span style="font-size:.78rem;color:#888">${choiceB?(choiceB==='A'?hq.A:hq.B):'미답변'}</span>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+
+  // Couple color legend (no name reveal)
+  html+=`<div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:18px;padding:16px;border:2px solid #C8B6E2;margin-bottom:10px">
+    <div style="font-size:.72rem;font-weight:700;color:#E05E9B;margin-bottom:10px;letter-spacing:.08em">💌 커플 색깔 안내</div>`;
+  couples.forEach(([pA,pB],ci)=>{
+    const color=COLORS[ci%COLORS.length];
+    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="width:18px;height:18px;border-radius:50%;background:${color};flex-shrink:0"></div>
+      <div style="width:18px;height:18px;border-radius:50%;background:${color};opacity:.6;flex-shrink:0"></div>
+      <span style="font-size:.85rem;font-weight:800;color:#7B5EA7">? 💘 ?</span>
+    </div>`;
+  });
+  html+='</div>';
+
+  document.getElementById('hidden-rev-content').innerHTML=html;
+}
+
+function renderEnd(players,finals,answers){
+  show('s-end');
+  const matches=getCouples(players,finals);
   const me=players.find(p=>p.id===myId)||{};
   const myChoice=finals.find(f=>f.player_id===myId)?.target_id;
   const myMatch=matches.find(([a,b])=>a.id===myId||b.id===myId);
@@ -1023,6 +1194,12 @@ function renderEnd(players,finals){
     </div>`;
   }
   document.getElementById('end-content').innerHTML=html;
+  const btnWrap=document.getElementById('hidden-stage-btn-wrap');
+  if(isHost&&matches.length>=2&&!answers.some(a=>a.stage===98)){
+    btnWrap.style.display='block';
+  } else {
+    btnWrap.style.display='none';
+  }
 }
 </script>
 </body>
