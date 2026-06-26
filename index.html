@@ -290,11 +290,14 @@ input:focus{border-color:#7B5EA7}
 <div id="s-hidden-q" class="screen">
   <div style="font-size:.65rem;letter-spacing:.2em;color:#C8B6E2;font-weight:700;margin-bottom:6px">✦ HIDDEN STAGE ✦</div>
   <h2 style="font-size:1.05rem;margin-bottom:16px">💫 커플들의 은밀한 질문</h2>
+  <!-- 내 이모지 뱃지 (커플된 플레이어용) -->
+  <div id="hidden-my-emoji" style="display:none;align-items:center;justify-content:center;gap:4px;background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:14px;padding:10px 16px;margin-bottom:12px;border:2px solid #F4A8D0;width:100%;box-sizing:border-box"></div>
   <div id="hidden-spectator" style="display:none;background:#F3EEFF;border-radius:18px;padding:20px;text-align:center;margin-bottom:16px">
     <div style="font-size:2rem;margin-bottom:8px">👀</div>
     <div style="font-weight:800;color:#7B5EA7;margin-bottom:6px">관전 모드</div>
     <div style="font-size:.82rem;color:#aaa">커플들이 답변 중이에요…</div>
-    <div id="hidden-spec-progress" style="margin-top:12px;font-size:.78rem;color:#C8B6E2"></div>
+    <div id="hidden-spec-couples" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+    <div id="hidden-spec-progress" style="margin-top:8px;font-size:.78rem;color:#C8B6E2"></div>
   </div>
   <div id="hidden-q-wrap" style="display:none;width:100%">
     <div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:20px;padding:20px;margin-bottom:16px;border:2px solid #F4A8D0">
@@ -1039,6 +1042,9 @@ function getCouples(players,finals){
   return matches;
 }
 
+const HIDDEN_EMOJIS=['🥟','🌱','🦊','🌸','🍑','🦋','🌊','🍀','🌙','⭐','🦄','🍉','🌺','🦝','🍄','🐧','🎸','🍜','🪄','🎀','🦩','🍦','🌵','🐝','🎃'];
+const HIDDEN_HEARTS=['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💗'];
+
 const HIDDEN_QS=[
   {q:'마음에 드는 사람이 생기면',A:'❤️ 표현하는 편이다',B:'💙 천천히 알아가는 편이다'},
   {q:'오늘 함께한 사람들 중',A:'❤️ 더 이야기해보고 싶은 사람이 있다',B:'💙 다음 모임에서 천천히 알아가고 싶다'},
@@ -1054,9 +1060,26 @@ async function startHiddenStage(){
   const picked=Math.floor(Math.random()*HIDDEN_QS.length);
   const hq=HIDDEN_QS[picked];
   const {data:room}=await sb.from('rooms').select('custom_q').eq('id',roomId).single();
+  const {data:players}=await sb.from('players').select().eq('room_id',roomId);
+  const {data:finals}=await sb.from('final_choices').select().eq('room_id',roomId);
+  const couples=getCouples(players||[],finals||[]);
+
+  // Assign random emojis to each coupled player
+  const emojiPool=[...HIDDEN_EMOJIS].sort(()=>Math.random()-.5);
+  const hiddenEmojis={};
+  const coupleEmojis=[];
+  couples.forEach(([pA,pB],ci)=>{
+    const eA=emojiPool[ci*2]||'🌟';
+    const eB=emojiPool[ci*2+1]||'💫';
+    const heart=HIDDEN_HEARTS[ci%HIDDEN_HEARTS.length];
+    hiddenEmojis[pA.id]=eA;
+    hiddenEmojis[pB.id]=eB;
+    coupleEmojis.push({pA:pA.id,pB:pB.id,eA,eB,heart});
+  });
+
   const prevCQ=getHiddenCQ(room);
   const entry={qi:1,q:hq.q,A:hq.A,B:hq.B};
-  const newCQ={...prevCQ,hiddenHistory:[entry],usedHiddenIdx:[picked]};
+  const newCQ={...prevCQ,hiddenHistory:[entry],usedHiddenIdx:[picked],hiddenEmojis,coupleEmojis};
   await sb.from('rooms').update({status:'hidden_stage',question_idx:1,custom_q:JSON.stringify(newCQ)}).eq('id',roomId);
 }
 
@@ -1123,6 +1146,26 @@ function renderHiddenQ(room,players,finals,answers){
 
   const progressTxt=`${answeredCount}/${coupleCount}명 답변 완료`;
 
+  // My emoji badge
+  const myEmoji=(cq.hiddenEmojis||{})[myId];
+  const myCouple=(cq.coupleEmojis||[]).find(c=>c.pA===myId||c.pB===myId);
+  const emojiBadgeEl=document.getElementById('hidden-my-emoji');
+  if(emojiBadgeEl){
+    if(myEmoji&&myCouple){
+      const partnerEmoji=myCouple.pA===myId?myCouple.eB:myCouple.eA;
+      emojiBadgeEl.innerHTML=`<span style="font-size:1.4rem">${myEmoji}</span><span style="font-size:1rem">${myCouple.heart}</span><span style="font-size:1.4rem">${partnerEmoji}</span><span style="font-size:.72rem;color:#E05E9B;font-weight:700;margin-left:6px">← 나는 왼쪽 이모지!</span>`;
+      emojiBadgeEl.style.display='flex';
+    } else {
+      emojiBadgeEl.style.display='none';
+    }
+  }
+
+  // Couple guide for spectators
+  const specCouplesEl=document.getElementById('hidden-spec-couples');
+  if(specCouplesEl&&!isCoupled){
+    specCouplesEl.innerHTML=(cq.coupleEmojis||[]).map(c=>`<span style="font-size:1.2rem">${c.eA}${c.heart}${c.eB}</span>`).join('  ');
+  }
+
   if(!isCoupled){
     document.getElementById('hidden-spectator').style.display='block';
     document.getElementById('hidden-q-wrap').style.display='none';
@@ -1155,55 +1198,151 @@ function renderHiddenQ(room,players,finals,answers){
 
 function renderHiddenRev(room,players,finals,answers){
   show('s-hidden-rev');
-  const couples=getCouples(players,finals);
-  const COLORS=['#FF6B6B','#4ECDC4','#FECA57','#A29BFE','#FD79A8','#00CEC9','#E17055','#74B9FF','#55EFC4','#FDCB6E'];
-
   const cq=room.custom_q?JSON.parse(room.custom_q):{};
   const hiddenHistory=cq.hiddenHistory||[];
-  let html='';
-  hiddenHistory.forEach((entry)=>{
-    const qi=entry.qi;
-    const qAnswers=answers.filter(a=>a.stage===98&&a.question_idx===qi);
-    if(!qAnswers.length)return;
-    const hq={q:entry.q,A:entry.A,B:entry.B};
-    html+=`<div style="background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;border:2px solid #F4A8D0">
-      <div style="font-size:.7rem;font-weight:700;color:#E05E9B;margin-bottom:8px">Q${qi}. ${esc(hq.q)}</div>`;
-    couples.forEach(([pA,pB],ci)=>{
-      const color=COLORS[ci%COLORS.length];
-      const ansA=qAnswers.find(a=>a.player_id===pA.id);
-      const ansB=qAnswers.find(a=>a.player_id===pB.id);
-      const choiceA=ansA?.choice;
-      const choiceB=ansB?.choice;
-      html+=`<div style="background:#FFF8FC;border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:4px solid ${color}">
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
-          <div style="width:22px;height:22px;border-radius:50%;background:${color};flex-shrink:0"></div>
-          <span style="font-weight:800;color:#5B2D7E">?</span>
-          <span style="font-size:.78rem;color:#888">${choiceA?(choiceA==='A'?hq.A:hq.B):'미답변'}</span>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div style="width:22px;height:22px;border-radius:50%;background:${color};flex-shrink:0;opacity:.6"></div>
-          <span style="font-weight:800;color:#5B2D7E">?</span>
-          <span style="font-size:.78rem;color:#888">${choiceB?(choiceB==='A'?hq.A:hq.B):'미답변'}</span>
-        </div>
-      </div>`;
-    });
-    html+='</div>';
-  });
+  const hiddenEmojis=cq.hiddenEmojis||{};
+  const coupleEmojis=cq.coupleEmojis||[];
+  const couples=getCouples(players,finals);
 
-  // Couple color legend (no name reveal)
-  html+=`<div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:18px;padding:16px;border:2px solid #C8B6E2;margin-bottom:10px">
-    <div style="font-size:.72rem;font-weight:700;color:#E05E9B;margin-bottom:10px;letter-spacing:.08em">💌 커플 색깔 안내</div>`;
-  couples.forEach(([pA,pB],ci)=>{
-    const color=COLORS[ci%COLORS.length];
-    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      <div style="width:18px;height:18px;border-radius:50%;background:${color};flex-shrink:0"></div>
-      <div style="width:18px;height:18px;border-radius:50%;background:${color};opacity:.6;flex-shrink:0"></div>
-      <span style="font-size:.85rem;font-weight:800;color:#7B5EA7">? 💘 ?</span>
-    </div>`;
+  // Couple guide
+  const myCouple=coupleEmojis.find(c=>c.pA===myId||c.pB===myId);
+  const myEmoji=hiddenEmojis[myId];
+  let html=`<div style="background:linear-gradient(135deg,#FFF0F8,#F3EEFF);border-radius:18px;padding:14px 16px;border:2px solid #F4A8D0;margin-bottom:14px">
+    <div style="font-size:.72rem;font-weight:700;color:#E05E9B;margin-bottom:10px;letter-spacing:.08em">💌 커플 안내</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">`;
+  coupleEmojis.forEach(c=>{
+    html+=`<div style="font-size:1.5rem;letter-spacing:2px">${c.eA}${c.heart}${c.eB}</div>`;
   });
-  html+='</div>';
+  html+=`</div>`;
+  if(myEmoji&&myCouple){
+    const partnerEmoji=myCouple.pA===myId?myCouple.eB:myCouple.eA;
+    html+=`<div style="margin-top:10px;text-align:center;font-size:.78rem;color:#E05E9B;font-weight:700">나는 <span style="font-size:1.1rem">${myEmoji}</span> 이에요!</div>`;
+  }
+  html+=`</div>`;
+
+  // Board wrap for animation
+  html+=`<div id="hidden-board-wrap" style="border-radius:20px;background:linear-gradient(180deg,#FFF0F8 0%,#F3EEFF 60%,#EEF4FF 100%);border:2px solid #F4A8D0;overflow:hidden;position:relative">
+    <div style="text-align:center;padding:8px 0;font-size:.7rem;font-weight:700;color:#E05E9B;letter-spacing:.1em">✦ HIDDEN STAGE ✦</div>
+    <div id="hidden-board-inner" style="position:relative;width:100%"></div>
+  </div>`;
 
   document.getElementById('hidden-rev-content').innerHTML=html;
+
+  // Run board animation
+  const couplePlayerIds=couples.flat().map(p=>p.id);
+  const allCoupledPlayers=players.filter(p=>couplePlayerIds.includes(p.id));
+  startHiddenBoardAnim(hiddenHistory,allCoupledPlayers,answers,hiddenEmojis,coupleEmojis);
+}
+
+async function startHiddenBoardAnim(history,coupledPlayers,answers,hiddenEmojis,coupleEmojis){
+  const inner=document.getElementById('hidden-board-inner');
+  if(!inner)return;
+  const N=history.length;
+  const ROW=130;
+  const PIECE=36;
+  const W=inner.parentElement.offsetWidth||340;
+  const totalH=N*ROW+80;
+  inner.style.height=totalH+'px';
+  inner.style.position='relative';
+
+  // Center line
+  const vline=document.createElement('div');
+  vline.className='bline';
+  vline.style.cssText=`width:3px;top:0;height:${totalH}px`;
+  inner.appendChild(vline);
+
+  // Draw nodes + branch lines + labels per question
+  history.forEach((entry,qi)=>{
+    const cy=qi*ROW+20;
+    const qtxt=document.createElement('div');
+    qtxt.style.cssText=`position:absolute;left:50%;transform:translateX(-50%);top:${cy-2}px;white-space:nowrap;font-size:.68rem;font-weight:800;color:#E05E9B;background:#fff;padding:3px 10px;border-radius:10px;border:1.5px solid #F4A8D0;z-index:4;max-width:${W*0.82}px;overflow:hidden;text-overflow:ellipsis`;
+    qtxt.textContent=`Q${entry.qi}. ${entry.q}`;
+    inner.appendChild(qtxt);
+    const nd=document.createElement('div');
+    nd.className='bnode';
+    nd.style.cssText=`width:36px;height:36px;top:${cy+22}px;border-color:#F4A8D0;color:#E05E9B`;
+    nd.textContent=`${entry.qi}`;
+    inner.appendChild(nd);
+    const branchY=cy+58,branchH=ROW-58;
+    const la=document.createElement('div');la.className='bline-a';
+    la.style.cssText=`width:3px;height:${branchH}px;top:${branchY}px;left:${W*0.25-1.5}px`;
+    inner.appendChild(la);
+    const lb=document.createElement('div');lb.className='bline-b';
+    lb.style.cssText=`width:3px;height:${branchH}px;top:${branchY}px;left:${W*0.75-1.5}px`;
+    inner.appendChild(lb);
+    const ansY=branchY+8;
+    const lA=document.createElement('div');
+    lA.style.cssText=`position:absolute;top:${ansY}px;left:4px;width:${W*0.42}px;opacity:0;transition:opacity .4s;z-index:4`;
+    lA.id=`hbla-${qi}`;
+    lA.innerHTML=`<div style="background:#FFB5A7;color:#fff;border-radius:10px;padding:3px 7px;font-size:.62rem;font-weight:700;line-height:1.3;text-align:center">❤️<br>${esc(entry.A.replace(/^❤️\s*/,''))}</div>`;
+    inner.appendChild(lA);
+    const lB=document.createElement('div');
+    lB.style.cssText=`position:absolute;top:${ansY}px;right:4px;width:${W*0.42}px;opacity:0;transition:opacity .4s;z-index:4`;
+    lB.id=`hblb-${qi}`;
+    lB.innerHTML=`<div style="background:#9DD9D2;color:#fff;border-radius:10px;padding:3px 7px;font-size:.62rem;font-weight:700;line-height:1.3;text-align:center">💙<br>${esc(entry.B.replace(/^💙\s*/,''))}</div>`;
+    inner.appendChild(lB);
+  });
+
+  // Lobby
+  const lobbyEl=document.createElement('div');
+  lobbyEl.className='blobby';
+  lobbyEl.style.cssText=`top:${N*ROW+20}px;font-size:1.2rem`;
+  lobbyEl.innerHTML='<div style="background:#fff;border-radius:16px;padding:6px 16px;border:2px solid #F4A8D0;font-size:.75rem;font-weight:800;color:#E05E9B">💫 END</div>';
+  inner.appendChild(lobbyEl);
+
+  // Emoji pieces
+  const n=coupledPlayers.length;
+  const pieceData=coupledPlayers.map((p,pi)=>{
+    const emoji=hiddenEmojis[p.id]||'?';
+    const el=document.createElement('div');
+    el.style.cssText=`position:absolute;width:${PIECE}px;height:${PIECE+14}px;opacity:0;top:-50px;left:${W/2-PIECE/2}px;display:flex;flex-direction:column;align-items:center;gap:1px;transition:left .5s ease,top .5s ease,opacity .4s;z-index:5`;
+    el.innerHTML=`<div style="width:${PIECE}px;height:${PIECE}px;border-radius:50%;background:#FFF0F8;border:2px solid #F4A8D0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 8px rgba(244,168,208,.4)">${emoji}</div><div style="font-size:.48rem;font-weight:800;color:#E05E9B;background:rgba(255,255,255,.9);border-radius:6px;padding:1px 4px">?</div>`;
+    inner.appendChild(el);
+    return{el,p};
+  });
+
+  function placeGroupH(group,xCenter,yCenter){
+    const cnt=group.length;if(!cnt)return;
+    const step=cnt>1?Math.min(PIECE+2,Math.max(10,(W*0.38-PIECE)/(cnt-1))):0;
+    const totalW=(cnt-1)*step+PIECE;
+    let startX=xCenter-totalW/2;
+    startX=Math.max(2,Math.min(startX,W-totalW-2));
+    group.forEach(({el},i)=>{el.style.left=(startX+i*step)+'px';el.style.top=(yCenter-PIECE/2)+'px';});
+  }
+
+  await sleep(300);
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  const initStep=n>1?Math.min(PIECE+4,(W-PIECE)/(n-1)):0;
+  pieceData.forEach(({el},i)=>{
+    el.style.opacity='1';
+    el.style.left=(W/2+(i-(n-1)/2)*initStep-PIECE/2)+'px';
+    el.style.top='60px';
+  });
+
+  for(let qi=0;qi<history.length;qi++){
+    const entry=history[qi];
+    await sleep(750);
+    const la=document.getElementById(`hbla-${qi}`);
+    const lb=document.getElementById(`hblb-${qi}`);
+    if(la)la.style.opacity='1';
+    if(lb)lb.style.opacity='1';
+    await sleep(250);
+    const aGroup=[],bGroup=[];
+    pieceData.forEach(item=>{
+      const ans=answers.find(a=>a.player_id===item.p.id&&a.stage===98&&a.question_idx===entry.qi);
+      (ans?.choice==='A'?aGroup:bGroup).push(item);
+    });
+    const branchY=qi*ROW+78;
+    placeGroupH(aGroup,W*0.28,branchY);
+    placeGroupH(bGroup,W*0.72,branchY);
+    await sleep(800);
+    const nextY=qi<history.length-1?(qi+1)*ROW+60:history.length*ROW+60;
+    const cStep=n>1?Math.min(PIECE+4,(W-PIECE)/(n-1)):0;
+    pieceData.forEach(({el},i)=>{
+      el.style.left=(W/2+(i-(n-1)/2)*cStep-PIECE/2)+'px';
+      el.style.top=nextY+'px';
+    });
+  }
 }
 
 function renderEnd(players,finals,answers){
