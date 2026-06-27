@@ -78,6 +78,10 @@ td{padding:4px 8px;border-bottom:1px solid #1a1a2e;color:#ccc}
     <span style="font-size:.75rem;color:#666">5초마다 자동 갱신</span>
     <span id="last-updated" style="font-size:.72rem;color:#444"></span>
     <button class="btn-sm" onclick="loadAll()">↻ 새로고침</button>
+    <label style="font-size:.75rem;color:#666;display:flex;align-items:center;gap:6px;cursor:pointer;margin-left:8px">
+      <input type="checkbox" id="show-stale" onchange="render()" style="accent-color:#7B5EA7">
+      오래된 대기중 방 보기
+    </label>
   </div>
 
   <div class="stats" id="stats-bar"></div>
@@ -136,6 +140,8 @@ async function loadAll(){
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
 function renderStats(rooms,players){
+  const TWO_HOURS_S=2*60*60*1000;
+  const staleWaiting=rooms.filter(r=>r.status==='waiting'&&(Date.now()-new Date(r.created_at))>=TWO_HOURS_S);
   const active=rooms.filter(r=>r.status!=='ended'&&r.status!=='waiting');
   const ended=rooms.filter(r=>r.status==='ended');
   const hidden=rooms.filter(r=>['hidden_consent','hidden_stage','hidden_reveal'].includes(r.status));
@@ -145,6 +151,7 @@ function renderStats(rooms,players){
     <div class="stat-card"><div class="val">${ended.length}</div><div class="lbl">종료된 방</div></div>
     <div class="stat-card"><div class="val">${players.length}</div><div class="lbl">전체 플레이어</div></div>
     <div class="stat-card"><div class="val" style="color:#D4A0FF">${hidden.length}</div><div class="lbl">히든스테이지</div></div>
+    ${staleWaiting.length?`<div class="stat-card"><div class="val" style="color:#666">${staleWaiting.length}</div><div class="lbl">유령 방 (숨김)</div></div>`:''}
   `;
 }
 
@@ -167,12 +174,20 @@ function render(){
   const {rooms,players,answers,finals}=allData;
   renderStats(rooms,players);
 
-  if(!rooms.length){
-    document.getElementById('rooms-grid').innerHTML='<div class="empty">아직 생성된 방이 없어요</div>';
+  const showStale=document.getElementById('show-stale')?.checked;
+  const TWO_HOURS=2*60*60*1000;
+  const visibleRooms=showStale?rooms:rooms.filter(r=>{
+    if(r.status!=='waiting')return true;
+    return (Date.now()-new Date(r.created_at))<TWO_HOURS;
+  });
+  const hiddenCount=rooms.length-visibleRooms.length;
+
+  if(!visibleRooms.length){
+    document.getElementById('rooms-grid').innerHTML=`<div class="empty">활성 방이 없어요${hiddenCount?` (오래된 대기중 방 ${hiddenCount}개 숨김)`:''}</div>`;
     return;
   }
 
-  document.getElementById('rooms-grid').innerHTML=rooms.map(room=>{
+  document.getElementById('rooms-grid').innerHTML=visibleRooms.map(room=>{
     const rPlayers=players.filter(p=>p.room_id===room.id);
     const rAnswers=answers.filter(a=>a.room_id===room.id);
     const rFinals=finals.filter(f=>f.room_id===room.id);
