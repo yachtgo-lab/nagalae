@@ -75,7 +75,7 @@ td{padding:4px 8px;border-bottom:1px solid #1a1a2e;color:#ccc}
 
   <div class="refresh-bar">
     <div class="dot"></div>
-    <span style="font-size:.75rem;color:#666">실시간 연결됨</span>
+    <span style="font-size:.75rem;color:#666">5초마다 자동 갱신</span>
     <span id="last-updated" style="font-size:.72rem;color:#444"></span>
     <button class="btn-sm" onclick="loadAll()">↻ 새로고침</button>
   </div>
@@ -113,12 +113,7 @@ function doLogin(){
 
 async function init(){
   await loadAll();
-  // Realtime: re-load on any change
-  const ch=sb.channel('admin-monitor');
-  ['rooms','players','answers','final_choices'].forEach(t=>{
-    ch.on('postgres_changes',{event:'*',schema:'public',table:t},()=>loadAll());
-  });
-  ch.subscribe();
+  setInterval(loadAll,5000);
 }
 
 async function loadAll(){
